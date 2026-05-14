@@ -2,7 +2,7 @@
 -- postgres-xray.sql
 -- =====================================================================
 -- sql-x-ray: See the structure, not the data.
--- https://github.com/<your-username>/sql-x-ray
+-- https://github.com/hihipy/sql-x-ray
 --
 -- Privacy-safe PostgreSQL schema introspection for LLM context.
 --
