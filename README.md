@@ -18,7 +18,7 @@ The fastest way to see the output is to run it against a preloaded sample databa
 
 1. Open [sqlize.online](https://sqlize.online)
 2. Pick a ReadOnly sample database from the engine dropdown
-3. Paste the matching script from this repo (e.g. `postgresql/postgres-xray.sql`)
+3. Paste the matching script from this repo (e.g. `scripts/postgres-xray.sql`)
 4. Click **Run SQL code**
 5. The single result cell contains the full JSON dump. Copy it, paste into your LLM of choice, done.
 
@@ -119,7 +119,7 @@ An LLM can use this to write a correct join between `orders` and `customers` (ri
 
 ## Run it on your own database
 
-1. Pick the folder for your engine and open `<engine>-xray.sql`
+1. Open the script for your engine in the `scripts/` folder
 2. Adjust the `params` block at the top of the file (schema filter, whether to include row counts, whether to pretty-print)
 3. Run the script in any SQL client (DBeaver, DataGrip, psql, pgAdmin, Metabase, Insight, SSMS, Snowsight)
 4. The result is a single cell containing a JSON document. Copy and save it as `schema.json`.
@@ -177,14 +177,12 @@ Existence is still recorded where useful. `check_constraint_count: 3` tells the 
 
 | Engine | Script | Status | Minimum version |
 |---|---|---|---|
-| PostgreSQL | `postgresql/postgres-xray.sql` | Stable | PostgreSQL 12 |
-| SQLite | `sqlite/sqlite-xray.sql` | Planned | |
-| MySQL / MariaDB | `mysql/mysql-xray.sql` | Planned | |
-| SQL Server | `sqlserver/sqlserver-xray.sql` | Planned | |
-| Snowflake | `snowflake/snowflake-xray.sql` | Planned | |
-| BigQuery | `bigquery/bigquery-xray.sql` | Planned | |
-
-Each engine lives in its own folder so it's obvious at a glance which file applies to which database.
+| PostgreSQL | `scripts/postgres-xray.sql` | Stable | PostgreSQL 12 |
+| SQLite | `scripts/sqlite-xray.sql` | Planned | |
+| MySQL / MariaDB | `scripts/mysql-xray.sql` | Planned | |
+| SQL Server | `scripts/sqlserver-xray.sql` | Planned | |
+| Snowflake | `scripts/snowflake-xray.sql` | Planned | |
+| BigQuery | `scripts/bigquery-xray.sql` | Planned | |
 
 ---
 
