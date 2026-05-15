@@ -85,7 +85,8 @@ extension_owned AS (
 -- ---------------------------------------------------------------------
 candidate_schemas AS (
     SELECT n.oid AS schema_oid, n.nspname AS schema_name
-    FROM pg_namespace n, params
+    FROM pg_namespace n
+    CROSS JOIN params
     WHERE n.nspname LIKE params.schema_filter
       AND n.nspname NOT IN ('pg_catalog', 'information_schema', 'pg_toast')
       AND n.nspname NOT LIKE 'pg_temp_%'
@@ -93,7 +94,8 @@ candidate_schemas AS (
 ),
 target_schemas AS (
     SELECT cs.schema_oid, cs.schema_name
-    FROM candidate_schemas cs, params
+    FROM candidate_schemas cs
+    CROSS JOIN params
     WHERE NOT (
         params.exclude_empty_public
         AND cs.schema_name = 'public'
@@ -558,7 +560,6 @@ FROM (
     SELECT jsonb_strip_nulls(jsonb_build_object(
         'metadata', jsonb_build_object(
             'tool_name',        'sql-x-ray',
-            'tool_version',     '1.0.0',
             'engine',           'postgresql',
             'engine_version',   split_part(current_setting('server_version'), ' ', 1),
             'database',         current_database(),
