@@ -4,71 +4,63 @@
 -- Generates a privacy-safe structural Markdown dump of a database
 -- schema, suitable as priming context for an LLM.
 --
--- WHY MARKDOWN INSTEAD OF JSON
+-- Repository: https://github.com/hihipy/sql-x-ray
+-- License:    CC BY-NC-SA 4.0
+--
+-- Target: Firebird 4.0+
+--   Uses RDB$ system catalog (RDB$RELATIONS, RDB$RELATION_FIELDS,
+--   RDB$FIELDS, etc.), LIST() aggregate with derived-table
+--   ordering, ASCII_CHAR(10) for line breaks, and standard SQL
+--   CTEs. Tested against Firebird's bundled Employee database.
+--
+-- Catalog source: RDB$ system tables.
+--   Firebird has a single namespace per database (schemas were
+--   proposed but not implemented as of 4.0). The output does not
+--   include any schema prefix on object names.
+--
+-- Why Markdown instead of JSON:
 --   Firebird 4.0 has no native JSON functions. JSON_OBJECT,
 --   JSON_ARRAYAGG, JSON_QUERY etc. are still in proposal stage for
---   future Firebird releases (likely 6.0+). Building JSON in Firebird
---   4.0 would require fully manual string concatenation with explicit
---   quote escaping for every key and value. Markdown construction is
---   meaningfully simpler since it doesn't need structural delimiters
---   or escape rules for content. The output is still single-column
---   text and still LLM-friendly, just not parseable as JSON. The
---   other sql-x-ray engines (postgres, mysql, mariadb, sqlserver) all
---   produce JSON; this is the one outlier.
+--   future Firebird releases (likely 6.0+). Building JSON manually
+--   in Firebird 4.0 would require full string concatenation with
+--   explicit quote escaping for every key and value. Markdown
+--   construction is simpler since it doesn't need structural
+--   delimiters or escape rules for content. The output is still
+--   single-column text and still LLM-friendly, just not parseable
+--   as JSON. This is the one outlier among sql-x-ray engines.
 --
--- TARGET: Firebird 4.0+
---   Uses RDB$ system catalog (RDB$RELATIONS, RDB$RELATION_FIELDS,
---   RDB$FIELDS, etc.), LIST() aggregate with derived-table ordering,
---   ASCII_CHAR(10) for line breaks, and standard SQL CTEs.
+-- Usage:
+--   1. Connect to the target Firebird database.
+--   2. Run this script. The result is a single column containing
+--      one row of Markdown.
 --
--- NO SCHEMA CONCEPT
---   Firebird 4.0 has a single namespace per database (schemas were
---   proposed but not implemented as of this version). The output
---   does not include any schema/database prefix on object names.
+-- What's captured:
+--   tables       base tables with primary key, foreign keys, unique
+--                constraints, check_constraint_count, indexes,
+--                trigger_count, and columns
+--   views        name and column list with types
+--   procedures   standalone stored procedures (name, arguments,
+--                return type), no bodies
+--   functions    standalone user-defined functions
+--   sequences    generators (Firebird's term for sequences)
+--   packages     PSQL packages (name only)
+--   gtts         global temporary tables
 --
--- NO ROW COUNT OR SIZE STATS
---   Firebird's catalog does not expose row counts or table sizes
---   the way Postgres/MySQL/SQL Server do. Selectivity exists in
---   RDB$INDICES.RDB$STATISTICS but it's index-level, not table-level,
---   so this script omits stats entirely rather than reporting fake
---   nulls.
---
--- ORDERING CAVEAT
---   Firebird's LIST() aggregate does not support an ORDER BY clause
---   (a long-requested feature). The pattern used throughout this
---   script wraps the row source in a derived table with ORDER BY,
---   which causes the optimizer to feed LIST() rows in that order in
---   practice. This is documented in the Firebird language reference
---   as a best-effort trick that depends on implementation details.
---   In the small sample databases this is reliable; on larger
---   databases with parallel query execution, ordering may vary.
---
--- USAGE
---   Connect to the target database and run this script. The result
---   is a single column 'schema_dump' containing one row of markdown.
---   Identifier filtering is hardcoded to user objects only
---   (RDB$SYSTEM_FLAG = 0 or NULL).
---
--- WHAT'S CAPTURED
---   tables       columns (name, type, nullability, identity flag,
---                generated flag, default presence), primary key,
---                foreign keys, unique constraints,
---                check_constraint_count, indexes, trigger_count
---   views        column list with resolved types
---   procedures   name, kind (executable/selectable), arguments,
---                package association
---   functions    name, return type, arguments, package association
---   sequences    name only (no start, increment, or current value)
---   packages     name only
---   global temp tables  name, GTT preservation behavior, columns
---
--- WHAT'S DELIBERATELY EXCLUDED FOR PRIVACY
---   - column default value literals (presence only)
+-- What's deliberately excluded for privacy:
+--   - column default value literals (presence flag only)
 --   - check constraint expressions (count only)
---   - view bodies, procedure bodies, function bodies, trigger bodies
+--   - view bodies, routine bodies, trigger bodies, package bodies
+--   - row counts and size estimates (Firebird's catalog doesn't
+--     expose table-level stats reliably)
+--   - column comments and table comments
 --   - data row contents
---   - sequence current value, increment, initial value
---   - column descriptions and other extended attributes
+--
+-- Ordering caveat:
+--   Firebird's LIST() aggregate does not support ORDER BY directly.
+--   The script wraps row sources in derived tables with ORDER BY,
+--   which causes the optimizer to feed LIST() rows in that order
+--   in practice. On small sample databases this is reliable; with
+--   parallel execution on large databases, ordering may vary.
 -- =====================================================================
 
 WITH
@@ -183,7 +175,7 @@ user_gtts AS (
 ),
 
 -- =====================================================================
--- COLUMN ROWS (used by table and view markdown builders)
+-- COLUMNS
 -- =====================================================================
 table_columns AS (
     SELECT
@@ -302,7 +294,7 @@ uq_columns AS (
 ),
 
 -- =====================================================================
--- CHECK CONSTRAINTS (count only)
+-- CHECK CONSTRAINT COUNTS
 -- =====================================================================
 check_counts AS (
     SELECT TRIM(rc.rdb$relation_name) AS relation_name,
@@ -313,7 +305,7 @@ check_counts AS (
 ),
 
 -- =====================================================================
--- INDEXES (excluding PK and unique constraint indexes)
+-- INDEXES (excludes PK-backing and unique-backing indexes)
 --
 -- Firebird auto-creates indexes to enforce PK/FK/UNIQUE; we list
 -- those constraints in their own sections, so we exclude their
@@ -344,7 +336,7 @@ index_columns_data AS (
 ),
 
 -- =====================================================================
--- TRIGGERS (count per relation)
+-- TRIGGER COUNTS
 -- =====================================================================
 trigger_counts AS (
     SELECT TRIM(t.rdb$relation_name) AS relation_name,

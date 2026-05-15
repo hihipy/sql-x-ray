@@ -1,72 +1,57 @@
 -- =====================================================================
--- mysql-xray.sql
+-- sql-x-ray for MySQL 8.0.16+
 -- =====================================================================
--- sql-x-ray: See the structure, not the data.
--- https://github.com/hihipy/sql-x-ray
+-- Generates a privacy-safe structural JSON dump of a database schema,
+-- suitable as priming context for an LLM.
 --
--- Privacy-safe MySQL schema introspection for LLM context.
+-- Repository: https://github.com/hihipy/sql-x-ray
+-- License:    CC BY-NC-SA 4.0
 --
--- WHAT THIS DOES
---   Outputs a single JSON document describing the SHAPE of a MySQL
---   database: tables, columns, types, relationships, indexes, and
---   constraint existence. Designed to be fed to any LLM as priming
---   context so it can write accurate queries against your schema.
+-- Target: MySQL 8.0.16+
+--   Requires native JSON functions (JSON_OBJECT, JSON_ARRAYAGG)
+--   which became reliable in 8.0.16. Tested on MySQL 8.0 and 9.x
+--   with the Sakila sample database. MariaDB is NOT supported; its
+--   catalog views diverge meaningfully from MySQL's. See
+--   mariadb-xray.sql for the MariaDB equivalent.
 --
--- WHAT THIS DELIBERATELY DOES NOT INCLUDE
---   This script never extracts values that could carry sensitive data:
---     - No ENUM / SET value labels (column type reduced to "enum" or
---       "set" without the value list)
---     - No CHECK constraint expressions (counts only)
---     - No default-value literals (existence only)
---     - No view definitions or routine bodies (signatures only)
---     - No table or column comments (free text, could be anything)
---     - No row data of any kind
---   It DOES include the existence and count of each of the above.
+-- Catalog source: information_schema.* views.
+--   MySQL's information_schema is the standard catalog. We use
+--   CONVERT(... USING utf8mb4) on cross-table name comparisons
+--   because I_S views can have inconsistent collations across
+--   tables, which throws "Illegal mix of collations" errors on
+--   direct equality joins.
 --
--- COMPATIBILITY
---   MySQL 8.0.16 or newer. No extensions or plugins required.
---   Tested on MySQL 8.0 and 9.x with the Sakila sample database.
---   MariaDB is NOT supported. Its catalog views diverge meaningfully
---   from MySQL's; see mariadb-xray.sql.
+-- Usage:
+--   1. Connect to MySQL. The script targets the current database
+--      via DATABASE().
+--   2. Run this script. The result is a single column schema_dump
+--      containing one row of JSON.
 --
--- A NOTE ON "SCHEMA" IN MYSQL
---   MySQL treats "database" and "schema" as synonyms. This script uses
---   "schema" in the output JSON to stay consistent with the Postgres
---   version. Each entry in metadata.schemas is one MySQL database.
+-- What's captured:
+--   tables     base tables with kind, partition flag, row count and
+--              size estimate, primary key, foreign keys, unique
+--              constraints, check_constraint_count, indexes,
+--              trigger_count, and columns
+--   views      schema-qualified name and column list with types
+--   routines   user-defined functions and procedures (name, kind,
+--              language, arguments, return type), no bodies
+--   sequences  empty array (MySQL has no sequence objects;
+--              autoincrement is per-column metadata)
+--   packages   empty array (MySQL has no package concept)
 --
--- TWO MYSQL QUIRKS THIS WORKS AROUND
+-- What's deliberately excluded for privacy:
+--   - column default value literals (presence flag only)
+--   - check constraint expressions (count only)
+--   - view bodies, routine bodies, trigger bodies
+--   - ENUM and SET value labels (type marked as "enum"/"set" only)
+--   - table and column comments (free text, could be anything)
+--   - data row contents
 --
---   1. Inconsistent information_schema collations. On many MySQL
---      installations the I_S views have a mix of utf8mb3_general_ci
---      and utf8mb3_unicode_ci across different tables. Direct equality
---      between schema names from different I_S tables throws "Illegal
---      mix of collations". This script wraps every cross-table name
---      comparison in CONVERT(... USING utf8mb4) on both sides.
---
---      A small number of hosted MySQL sandboxes (notably sqlize.online)
---      appear to drop the CONVERT during CTE materialization, which
---      leaves the routines array and trigger_count fields empty even
---      though every comparison has been wrapped. Standard MySQL 8+ and
---      9+ installations use utf8mb4 throughout information_schema and
---      are not affected. If you see empty routines or zero trigger
---      counts on a database where you know both exist, the underlying
---      cause is the catalog collation mix, not the script.
---
---   2. JSON_ARRAYAGG has no ORDER BY clause in MySQL 8.0 or 9.0, and
---      the optimizer is free to drop ORDER BY from a derived table
---      feeding an aggregate. Column orderings get scrambled. This
---      script builds ordered JSON arrays using GROUP_CONCAT, which
---      does support ORDER BY natively. Output is cast back to JSON.
---      The session variable group_concat_max_len is raised to its
---      maximum so wide tables don't get truncated.
---
--- USAGE
---   Edit the three SET statements below, then run.
---   Result is a single cell containing a pretty-printed JSON document.
---   Save the cell contents as schema.json and feed to your LLM.
---
--- LICENSE
---   CC BY-NC-SA 4.0 - https://creativecommons.org/licenses/by-nc-sa/4.0/
+-- MySQL-specific notes:
+--   - "Database" and "schema" are synonyms in MySQL; we emit "schema"
+--     in JSON for cross-engine parity.
+--   - JSON_ARRAYAGG does not honor ORDER BY in MySQL 8.0; we use
+--     ordered subqueries to get deterministic output.
 -- =====================================================================
 
 -- ---------------------------------------------------------------------
@@ -91,7 +76,7 @@ SET SESSION group_concat_max_len = 4294967295;
 WITH
 
 -- =====================================================================
--- COLUMNS (table columns; view columns handled separately below)
+-- COLUMNS
 -- =====================================================================
 cols AS (
     SELECT
@@ -309,7 +294,7 @@ trgs AS (
 ),
 
 -- =====================================================================
--- PARTITIONING FLAG
+-- PARTITIONED TABLES
 -- =====================================================================
 partitioned AS (
     SELECT DISTINCT
@@ -323,7 +308,7 @@ partitioned AS (
 ),
 
 -- =====================================================================
--- TABLE METADATA (kind, engine, partition flag, stats)
+-- TABLE METADATA
 -- Stats are included only when @include_stats is TRUE.
 -- =====================================================================
 tbl_meta AS (
@@ -348,7 +333,7 @@ tbl_meta AS (
 ),
 
 -- =====================================================================
--- ASSEMBLE TABLES
+-- TABLES
 -- All CTE schema_name and table_name values are utf8mb4, so direct
 -- equality joins work without further conversion.
 -- =====================================================================
@@ -431,7 +416,7 @@ views_json AS (
 ),
 
 -- =====================================================================
--- ROUTINES (signatures only)
+-- ROUTINES
 -- =====================================================================
 routine_args AS (
     SELECT

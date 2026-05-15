@@ -1,31 +1,33 @@
 -- =====================================================================
--- sql-x-ray for SQLite 3.38+
+-- sql-x-ray for SQLite 3.44+
 -- =====================================================================
--- Generates a privacy-safe structural JSON dump of a SQLite database,
+-- Generates a privacy-safe structural JSON dump of a database schema,
 -- suitable as priming context for an LLM.
 --
--- Target: SQLite 3.38+ (released Feb 2022).
---   Requires native JSON functions: json_object, json_group_array,
---   json(). All bundled with the SQLite amalgamation since 3.38; no
---   extension loading required. The pragma table-valued functions
---   (pragma_table_info, pragma_foreign_key_list, pragma_index_list,
---   pragma_index_info) require SQLite 3.16+.
+-- Repository: https://github.com/hihipy/sql-x-ray
+-- License:    CC BY-NC-SA 4.0
+--
+-- Target: SQLite 3.44+
+--   Requires native JSON functions (json_object, json_group_array,
+--   json) bundled since 3.38, and ORDER BY inside json_group_array
+--   added in 3.44. Pragma table-valued functions (pragma_table_info,
+--   pragma_foreign_key_list, etc.) require 3.16+.
 --
 -- Catalog source: sqlite_master.
---   SQLite has no schema concept beyond attached databases, so this
---   script reports objects in the main database. We emit "main" as
---   the schema name for cross-engine field parity.
+--   SQLite has no schema concept beyond attached databases. The
+--   script reports objects in the main database and emits "main"
+--   as the schema name for cross-engine field parity.
 --
 -- Usage:
---   1. Run this script against any SQLite 3.38+ database.
---   2. The result is a single column SCHEMA_DUMP containing one row
---      of JSON.
+--   1. Run this script against any SQLite 3.44+ database.
+--   2. The result is a single column schema_dump containing one
+--      row of JSON.
 --
 -- What's captured:
---   tables     base tables with kind, primary key, foreign keys,
---              indexes (excluding auto-created PK/UNIQUE indexes),
+--   tables     base tables with primary key, foreign keys, indexes
+--              (excluding auto-created PK/UNIQUE indexes),
 --              trigger_count, and columns
---   views      schema-qualified name and column list with types
+--   views      name and column list with types
 --   routines   empty array (SQLite has no stored procedures or
 --              user-defined functions)
 --   sequences  empty array (SQLite has no sequence objects;
@@ -42,20 +44,21 @@
 --
 -- SQLite-specific notes:
 --   - PRAGMA returns reserved-word column names ("from", "to",
---     "table", "unique"), which we quote with double quotes.
---   - SQLite's pk column in pragma_table_info: 0 = not a PK column,
---     1+ = position in the PK (for composite PKs).
+--     "table", "unique", "notnull"), which we quote with double
+--     quotes.
+--   - pragma_table_info.pk is 0 for non-PK columns, 1+ for the
+--     column's position in a composite PK.
 --   - pragma_index_list.origin: 'c' = CREATE INDEX, 'u' = UNIQUE
 --     constraint, 'pk' = PRIMARY KEY. We filter to 'c' so the
 --     indexes section only shows explicitly-created indexes.
---   - SQLite stores most type information as declared text; we emit
---     the declared type directly without trying to normalize it.
+--   - SQLite stores types as declared text; we emit them directly
+--     without normalizing.
 -- =====================================================================
 
 WITH
 
 -- =====================================================================
--- COLUMNS per table
+-- COLUMNS
 --
 -- pragma_table_info returns: cid (column id, 0-indexed), name, type,
 -- notnull (0/1), dflt_value, pk (0 if not PK, else position in PK).
@@ -139,7 +142,7 @@ fks AS (
 ),
 
 -- =====================================================================
--- INDEXES (only user-created, excluding PK/UNIQUE auto-indexes)
+-- INDEXES (excludes PK-backing and unique-backing indexes)
 --
 -- pragma_index_list returns: seq, name, unique (0/1), origin
 -- ('c'/'u'/'pk'), partial (0/1). We keep only origin = 'c' since
@@ -177,7 +180,7 @@ idx AS (
 ),
 
 -- =====================================================================
--- TRIGGER counts per table
+-- TRIGGER COUNTS
 -- =====================================================================
 trigger_counts AS (
     SELECT
@@ -189,7 +192,7 @@ trigger_counts AS (
 ),
 
 -- =====================================================================
--- TABLES JSON
+-- TABLES
 -- =====================================================================
 tables_json AS (
     SELECT json_group_array(
