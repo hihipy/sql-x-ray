@@ -182,6 +182,7 @@ Existence is still recorded where useful. `check_constraint_count: 3` tells the 
 | [SQL Server](https://dbdb.io/db/sql-server) | `scripts/sqlserver-xray.sql` | Stable | SQL Server 2022 |
 | [Firebird](https://dbdb.io/db/firebird) | `scripts/firebird-xray.sql` | Stable (Markdown output) | Firebird 4.0 |
 | [Oracle](https://dbdb.io/db/oracle) | `scripts/oracle-xray.sql` | Stable | Oracle 18c |
+| [SQLite](https://dbdb.io/db/sqlite) | `scripts/sqlite-xray.sql` | Stable | SQLite 3.44 |
 | [Snowflake](https://dbdb.io/db/snowflake) | `scripts/snowflake-xray.sql` | Planned | |
 | [BigQuery](https://dbdb.io/db/bigquery) | `scripts/bigquery-xray.sql` | Planned | |
 
