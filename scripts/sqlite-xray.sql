@@ -272,6 +272,13 @@ meta AS (
         'generated_at',   strftime('%Y-%m-%dT%H:%M:%SZ', 'now'),
         'schema_filter',  'main',
         'schemas',        json_array('main'),
+        'object_counts',  json_object(
+            'tables', (SELECT COUNT(*) FROM sqlite_master
+                       WHERE type = 'table'
+                         AND name NOT LIKE 'sqlite_%'),
+            'views',  (SELECT COUNT(*) FROM sqlite_master
+                       WHERE type = 'view')
+        ),
         'privacy_note',
             'This document contains only structural metadata. ' ||
             'It deliberately excludes default value literals, ' ||

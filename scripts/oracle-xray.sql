@@ -539,6 +539,17 @@ meta AS (
         'generated_at'   VALUE TO_CHAR(SYS_EXTRACT_UTC(SYSTIMESTAMP), 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
         'schema_filter'  VALUE SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA'),
         'schemas'        VALUE JSON_ARRAY(SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA') RETURNING CLOB) FORMAT JSON,
+        'object_counts'  VALUE JSON_OBJECT(
+            'tables'    VALUE (SELECT COUNT(*) FROM tbl_meta),
+            'views'     VALUE (SELECT COUNT(*) FROM user_views),
+            'routines'  VALUE (SELECT COUNT(*) FROM user_procedures
+                               WHERE object_type IN ('PROCEDURE', 'FUNCTION')
+                                 AND procedure_name IS NULL),
+            'sequences' VALUE (SELECT COUNT(*) FROM user_sequences),
+            'packages'  VALUE (SELECT COUNT(*) FROM user_objects
+                               WHERE object_type = 'PACKAGE')
+            RETURNING CLOB
+        ) FORMAT JSON,
         'privacy_note'   VALUE
             'This document contains only structural metadata. '
          || 'It deliberately excludes default value literals, '

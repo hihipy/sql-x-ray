@@ -700,6 +700,11 @@ meta AS (
         'generated_at':   FORMAT(SYSUTCDATETIME(), N'yyyy-MM-ddTHH:mm:ssZ'),
         'schema_filter':  N'%',
         'schemas':        JSON_QUERY((SELECT payload FROM schemas_list)),
+        'object_counts':  JSON_OBJECT(
+            'tables':   (SELECT COUNT(*) FROM OPENJSON(COALESCE((SELECT payload FROM tables_json),   N'[]'))),
+            'views':    (SELECT COUNT(*) FROM OPENJSON(COALESCE((SELECT payload FROM views_json),    N'[]'))),
+            'routines': (SELECT COUNT(*) FROM OPENJSON(COALESCE((SELECT payload FROM routines_json), N'[]')))
+        ),
         'privacy_note':
             N'This document contains only structural metadata. '
           + N'It deliberately excludes: default value literals, '
