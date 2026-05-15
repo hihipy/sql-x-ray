@@ -1,90 +1,58 @@
 -- =====================================================================
--- mariadb-xray.sql
+-- sql-x-ray for MariaDB 10.5+
 -- =====================================================================
--- sql-x-ray: See the structure, not the data.
--- https://github.com/hihipy/sql-x-ray
+-- Generates a privacy-safe structural JSON dump of a database schema,
+-- suitable as priming context for an LLM.
 --
--- Privacy-safe MariaDB schema introspection for LLM context.
+-- Repository: https://github.com/hihipy/sql-x-ray
+-- License:    CC BY-NC-SA 4.0
 --
--- WHAT THIS DOES
---   Outputs a single JSON document describing the SHAPE of a MariaDB
---   database: tables, columns, types, relationships, indexes, sequences,
---   and constraint existence. Designed to be fed to any LLM as priming
---   context so it can write accurate queries against your schema.
---
--- WHAT THIS DELIBERATELY DOES NOT INCLUDE
---   This script never extracts values that could carry sensitive data:
---     - No ENUM / SET value labels (column type reduced to "enum" or
---       "set" without the value list)
---     - No CHECK constraint expressions (counts only)
---     - No default-value literals (existence only)
---     - No view definitions or routine bodies (signatures only)
---     - No table or column comments (free text, could be anything)
---     - No sequence start/increment/max values (existence only)
---     - No row data of any kind
---   It DOES include the existence and count of each of the above.
---
--- COMPATIBILITY
---   MariaDB 10.5 or newer. No plugins required. Tested on MariaDB 10.x
---   and 11.8 with the OpenFlights sample database.
---   MySQL is NOT the target of this script. While MariaDB started as a
+-- Target: MariaDB 10.5+
+--   Tested on MariaDB 10.x and 11.8 with the OpenFlights sample
+--   database. MySQL is NOT supported; while MariaDB started as a
 --   MySQL fork, the catalog views diverge meaningfully (sequences,
---   PACKAGE routines, system-versioned tables); see mysql-xray.sql.
+--   PACKAGE routines, system-versioned tables). See mysql-xray.sql
+--   for the MySQL equivalent.
 --
--- WHAT'S DIFFERENT FROM THE MYSQL SCRIPT
+-- Catalog source: information_schema.* views.
+--   MariaDB's information_schema is the standard catalog. We use
+--   CONVERT(... USING utf8mb4) on cross-table name comparisons to
+--   avoid "Illegal mix of collations" errors that can occur when
+--   I_S views have inconsistent collations.
 --
---   1. Sequences. MariaDB 10.3+ supports CREATE SEQUENCE. They appear
---      in information_schema.TABLES with TABLE_TYPE = 'SEQUENCE'. This
---      script emits them in the sequences[] array. Only existence is
---      recorded; start/increment/maxvalue are excluded by privacy
---      policy.
+-- Usage:
+--   1. Connect to MariaDB. The script targets the current database
+--      via DATABASE().
+--   2. Run this script. The result is a single column schema_dump
+--      containing one row of JSON.
 --
---   2. JSON_DETAILED instead of JSON_PRETTY. MariaDB's pretty-printer
---      is JSON_DETAILED, available since 10.2. JSON_PRETTY was added
---      later as an alias and is missing from older 10.x patch levels;
---      JSON_DETAILED has broader version coverage.
+-- What's captured:
+--   tables     base tables with kind, partition flag, row count and
+--              size estimate, primary key, foreign keys, unique
+--              constraints, check_constraint_count, indexes,
+--              trigger_count, and columns
+--   views      schema-qualified name and column list with types
+--   routines   user-defined functions and procedures (name, kind,
+--              language, arguments, return type), no bodies
+--   sequences  user-defined sequences (name only, no start,
+--              increment, or maxvalue)
+--   packages   empty array (PACKAGE routines exist in MariaDB
+--              Enterprise but are not surfaced in this script)
 --
---   3. Engine version string. MariaDB's VERSION() returns text like
---      "10.11.6-MariaDB-1:10.11.6+maria~ubu2204". This script reports
---      only the version prefix ("10.11.6") for cleaner output.
+-- What's deliberately excluded for privacy:
+--   - column default value literals (presence flag only)
+--   - check constraint expressions (count only)
+--   - view bodies, routine bodies, trigger bodies
+--   - ENUM and SET value labels (type marked as "enum"/"set" only)
+--   - table and column comments (free text, could be anything)
+--   - sequence numeric attributes
+--   - data row contents
 --
---   4. PACKAGE routines. MariaDB 10.3+ supports Oracle-style PACKAGEs
---      via ROUTINE_TYPE = 'PACKAGE' or 'PACKAGE BODY'. The existing
---      LOWER(ROUTINE_TYPE) handles these without special casing.
---
---   5. Storage engines. MariaDB ships with more engines than MySQL
---      (Aria, ColumnStore, MyRocks, Spider, CONNECT, SPHINX). The
---      engine field on each table reports whatever is configured;
---      no engine-specific handling is needed.
---
--- A NOTE ON MARIADB QUIRKS THIS WORKS AROUND
---
---   1. Inconsistent information_schema collations. Like MySQL, some
---      MariaDB installations ship I_S views with a mix of utf8mb3
---      collations. Cross-table comparisons throw "Illegal mix of
---      collations". This script wraps every schema and object name
---      comparison in CONVERT(... USING utf8mb4) on both sides.
---
---   2. JSON_ARRAYAGG ordering. The MariaDB optimizer can drop ORDER BY
---      from a derived table feeding JSON_ARRAYAGG. This script uses
---      GROUP_CONCAT with explicit ORDER BY and wraps the resulting
---      JSON-formatted string in JSON_EXTRACT(..., '$'), which is the
---      reliable pattern for ordered JSON arrays in MariaDB. CAST(...
---      AS JSON) does NOT work in MariaDB because JSON is a LONGTEXT
---      alias rather than a real type, so JSON is not a valid CAST
---      target; JSON_EXTRACT(..., '$') is the equivalent that returns
---      a value MariaDB will nest properly inside JSON_OBJECT.
---      The session variable group_concat_max_len is raised to its
---      maximum so wide tables and large schemas don't get truncated;
---      on very large dumps, max_allowed_packet may also need bumping.
---
--- USAGE
---   Edit the three SET statements below, then run.
---   Result is a single cell containing a JSON document.
---   Save the cell contents as schema.json and feed to your LLM.
---
--- LICENSE
---   CC BY-NC-SA 4.0 - https://creativecommons.org/licenses/by-nc-sa/4.0/
+-- MariaDB-specific notes:
+--   - Sequences (10.3+) appear in information_schema.TABLES with
+--     TABLE_TYPE = 'SEQUENCE'.
+--   - We use JSON_DETAILED rather than JSON_PRETTY; the latter
+--     was added later and has narrower version coverage.
 -- =====================================================================
 
 -- ---------------------------------------------------------------------
@@ -110,7 +78,7 @@ SET SESSION group_concat_max_len = 4294967295;
 WITH
 
 -- =====================================================================
--- COLUMNS (table columns; view columns handled separately below)
+-- COLUMNS
 -- =====================================================================
 cols AS (
     SELECT
@@ -323,7 +291,7 @@ trgs AS (
 ),
 
 -- =====================================================================
--- PARTITIONING FLAG
+-- PARTITIONED TABLES
 -- =====================================================================
 partitioned AS (
     SELECT DISTINCT
@@ -337,7 +305,7 @@ partitioned AS (
 ),
 
 -- =====================================================================
--- TABLE METADATA (kind, engine, partition flag, stats)
+-- TABLE METADATA
 --
 -- Stats note: TABLE_ROWS and DATA_LENGTH + INDEX_LENGTH from
 -- information_schema.TABLES are approximate, and how approximate
@@ -369,7 +337,7 @@ tbl_meta AS (
 ),
 
 -- =====================================================================
--- ASSEMBLE TABLES
+-- TABLES
 -- =====================================================================
 tables_json AS (
     SELECT JSON_EXTRACT(CONCAT('[', GROUP_CONCAT(
@@ -450,7 +418,7 @@ views_json AS (
 ),
 
 -- =====================================================================
--- ROUTINES (signatures only; includes PACKAGEs on MariaDB 10.3+)
+-- ROUTINES (includes PACKAGEs on MariaDB 10.3+)
 -- =====================================================================
 routine_args AS (
     SELECT

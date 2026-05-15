@@ -33,6 +33,7 @@ Sample databases available on sqlize.online:
 | MS SQL Server 2022 [AdventureWorks](https://learn.microsoft.com/en-us/sql/samples/adventureworks-install-configure) (ReadOnly) | Microsoft's bicycle company (68 tables, 5 schemas) |
 | Oracle Database 19c [HR](https://docs.oracle.com/en/database/oracle/oracle-database/19/comsc/installing-sample-schemas.html) | Classic Oracle HR sample (employees, departments, jobs) |
 | Firebird 4.0 [Employee](https://firebirdsql.org/manual/qsg2-installing.html) | Firebird's bundled sample |
+| SQLite 3 Preloaded | Custom lab and survey database with Palmer Penguins data (13 tables across staff, experiments, equipment, and penguins) |
 
 This is also the right way to validate a script after editing it. Test against a known schema before pointing it at your real database.
 
@@ -199,6 +200,77 @@ If you specifically need JSON from Firebird, the natural path is to wait for nat
 ### MySQL and MariaDB on hosted sandboxes
 
 A note on the MySQL and MariaDB scripts: a small number of hosted SQL sandbox environments (including sqlize.online) ship an `information_schema` with mixed `utf8mb3` collations and a query optimizer that drops explicit collation conversions during CTE materialization. On those environments some cross-CTE joins (most visibly `routines` and `trigger_count`) can come back empty even though the script handles the collation mismatch correctly. Standard MySQL 8+/9+ and MariaDB 10.5+ installations use `utf8mb4` throughout `information_schema` and are not affected.
+
+---
+
+## Script conventions
+
+All seven scripts share a consistent structure so they read alike. If you can navigate one, you can navigate the rest.
+
+### File layout
+
+Every script has the same top-level shape:
+
+1. **Header block** between `-- ===` bars, containing:
+   - Title: `sql-x-ray for <Engine> <minimum-version>+`
+   - One- or two-sentence description
+   - `Repository:` and `License:` lines
+   - `Target:` — engine version compatibility notes
+   - `Catalog source:` — which system catalog is used and why
+   - `Usage:` — numbered steps to run the script
+   - `What's captured:` — output sections with brief descriptions
+   - `What's deliberately excluded for privacy:` — bulleted list
+   - `<Engine>-specific notes:` — quirks specific to this engine
+2. **A single `WITH ... SELECT` query** comprising the body (Firebird uses the same shape, but its terminal `SELECT` assembles Markdown rather than JSON).
+3. **Section markers between CTEs.** Each logical group of CTEs is preceded by a three-line comment block:
+   ```sql
+   -- ====================================================================
+   -- SECTION NAME
+   -- ====================================================================
+   ```
+
+### Canonical section names
+
+Most scripts share the same ordered set of sections, omitting any that don't apply to the engine:
+
+| Section | Purpose |
+|---|---|
+| `COLUMNS` | column metadata per table |
+| `PRIMARY KEYS` | primary key columns per table |
+| `FOREIGN KEYS` | foreign key relationships per table |
+| `UNIQUE CONSTRAINTS` | unique constraints per table |
+| `CHECK CONSTRAINT COUNTS` | count of CHECK constraints (expressions excluded) |
+| `INDEXES` | user-defined indexes, excluding PK-backing and unique-backing |
+| `TRIGGER COUNTS` | count of triggers per table |
+| `TABLE METADATA` | per-table flags (partitioned, row count estimate, size estimate) |
+| `TABLES` | final assembly of the tables array |
+| `VIEWS` | views and their column lists |
+| `ROUTINES` | functions and stored procedures (signatures only) |
+| `SEQUENCES` | sequence objects (name only) |
+| `PACKAGES` | package objects (name only, where supported) |
+| `METADATA` | the dump's metadata header (tool name, engine, timestamp) |
+| `FINAL ASSEMBLY` | the outermost `SELECT` that emits `schema_dump` |
+
+Engine-specific sections keep their own descriptive names. PostgreSQL has `INHERITANCE / PARTITION PARENTS` and `USER-DEFINED TYPES`. MySQL, MariaDB, and SQL Server have `PARTITIONED TABLES` as a separate flag. Firebird has `TYPE RENDERING` and `USER RELATIONS` (Firebird-specific lookup CTEs) plus several Markdown assembly sections in place of the JSON `TABLES` / `VIEWS` blocks.
+
+### Code style
+
+| Aspect | Convention |
+|---|---|
+| SQL keywords | UPPERCASE (`SELECT`, `FROM`, `JOIN`, `GROUP BY`) |
+| Identifiers | lowercase, except where the catalog itself dictates otherwise (`RDB$RELATIONS` in Firebird, `USER_TAB_COLS` in Oracle, `INFORMATION_SCHEMA.TABLES` in standard SQL) |
+| Indentation | 4 spaces, no tabs |
+| Commas | trailing |
+| Line endings | LF |
+| Trailing whitespace | none |
+| Line length | soft target around 80 columns |
+
+### Comment style
+
+- Header block sections end with `:` (e.g. `Catalog source:`, `Usage:`).
+- Body section markers use ALL-CAPS titles inside `-- ===` bars.
+- Parenthetical clarifications are lowercase and added only when they convey non-obvious information. Example: `INDEXES (excludes PK-backing and unique-backing indexes)` is non-obvious; `COLUMNS (column metadata)` would just restate the title and is omitted.
+- Inline comments inside CTEs are mixed-case prose. They explain *why* (engine quirks, catalog gotchas, version constraints), not *what* (the SQL itself should be readable on its own).
 
 ---
 

@@ -4,19 +4,24 @@
 -- Generates a privacy-safe structural JSON dump of a database schema,
 -- suitable as priming context for an LLM.
 --
+-- Repository: https://github.com/hihipy/sql-x-ray
+-- License:    CC BY-NC-SA 4.0
+--
 -- Target: Oracle Database 18c+
---   This script relies on:
---     - JSON_OBJECT with VALUE keyword (Oracle 12.2+)
---     - JSON_ARRAYAGG with ORDER BY (Oracle 18c+)
+--   Relies on:
+--     - JSON_OBJECT with VALUE keyword (12.2+)
+--     - JSON_ARRAYAGG with ORDER BY (18c+)
 --     - FORMAT JSON clause for embedding JSON inside JSON (12.2+)
 --     - RETURNING CLOB on JSON functions to avoid the default
 --       VARCHAR2(4000) cap, which overflows easily (ORA-40478)
 --   Oracle 19c is the primary test target.
 --
 -- Catalog source: USER_* views.
---   The script reports objects owned by the currently connected user
---   (i.e. the current schema). If you need to dump a different
---   schema, switch user or use ALTER SESSION SET CURRENT_SCHEMA.
+--   Reports objects owned by the currently connected user (i.e.
+--   the current schema). To dump a different schema, connect as
+--   that user or use ALTER SESSION SET CURRENT_SCHEMA. The ALL_*
+--   variants would let one user see another's objects subject to
+--   grants; this script does not use them.
 --
 -- Usage:
 --   1. Connect to Oracle as the schema owner (e.g. HR for the
@@ -31,29 +36,33 @@
 --              indexes, trigger_count, and columns
 --   views      schema-qualified name and column list with types
 --   routines   standalone user-defined functions and procedures
---              (name, kind, arguments, return type). Routines inside
---              packages are not unrolled; they appear under the
---              parent package in the packages section.
---   sequences  user-defined sequences (name only)
+--              (name, kind, arguments, return type). Routines
+--              inside packages are not unrolled here.
+--   sequences  user-defined sequences (name only, no start,
+--              increment, or current value)
 --   packages   user-defined PL/SQL packages (name only)
 --
 -- What's deliberately excluded for privacy:
 --   - column default value literals (presence flag only)
 --   - check constraint expressions (count only)
 --   - view bodies, routine bodies, trigger bodies, package bodies
---   - data row contents
 --   - sequence numeric attributes
 --   - column comments and table comments
+--   - data row contents
 --   - dropped objects in the recycle bin (BIN$... names)
 --
--- Existence is recorded via counts (e.g. check_constraint_count,
--- trigger_count); contents are not.
+-- Oracle-specific notes:
+--   - Identifiers are stored uppercase.
+--   - NUMBER without precision is rendered as 'NUMBER'; with scale
+--     0 as 'NUMBER(p)'; otherwise 'NUMBER(p,s)'.
+--   - VARCHAR2 char vs byte semantics are surfaced via ' BYTE'
+--     suffix when explicitly byte-based.
 -- =====================================================================
 
 WITH
 
 -- =====================================================================
--- COLUMNS per table
+-- COLUMNS
 --
 -- Type rendering notes:
 --   VARCHAR2/NVARCHAR2/CHAR/NCHAR: CHAR_LENGTH gives the declared
@@ -243,7 +252,7 @@ uqs AS (
 ),
 
 -- =====================================================================
--- CHECK CONSTRAINTS (count only)
+-- CHECK CONSTRAINT COUNTS
 --
 -- Oracle exposes NOT NULL constraints as CHECK constraints with
 -- SEARCH_CONDITION like '"COL" IS NOT NULL'. We filter those out
@@ -261,7 +270,7 @@ check_counts AS (
 ),
 
 -- =====================================================================
--- INDEXES (excluding PK and unique constraint indexes)
+-- INDEXES (excludes PK-backing and unique-backing indexes)
 -- =====================================================================
 non_constraint_indexes AS (
     SELECT
@@ -309,7 +318,7 @@ idx AS (
 ),
 
 -- =====================================================================
--- TRIGGER counts per table
+-- TRIGGER COUNTS
 -- =====================================================================
 trigger_counts AS (
     SELECT
@@ -335,7 +344,7 @@ tbl_meta AS (
 ),
 
 -- =====================================================================
--- TABLES JSON
+-- TABLES
 -- =====================================================================
 tables_json AS (
     SELECT JSON_ARRAYAGG(
@@ -432,7 +441,7 @@ views_json AS (
 ),
 
 -- =====================================================================
--- ROUTINES (standalone procedures and functions, not in packages)
+-- ROUTINES
 -- =====================================================================
 routine_args AS (
     SELECT
@@ -500,7 +509,7 @@ sequences_json AS (
 ),
 
 -- =====================================================================
--- PACKAGES (name only; package members not unrolled in v1)
+-- PACKAGES
 -- =====================================================================
 packages_json AS (
     SELECT JSON_ARRAYAGG(

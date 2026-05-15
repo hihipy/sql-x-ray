@@ -1,35 +1,38 @@
 -- =====================================================================
--- sql-x-ray for SQL Server
+-- sql-x-ray for SQL Server 2022+
 -- =====================================================================
 -- Generates a privacy-safe structural JSON dump of a database schema,
 -- suitable as priming context for an LLM.
 --
+-- Repository: https://github.com/hihipy/sql-x-ray
+-- License:    CC BY-NC-SA 4.0
+--
 -- Target: SQL Server 2022+
---   This script relies on three features:
+--   Relies on three features:
 --     - JSON_OBJECT (scalar): added in SQL Server 2022
 --     - STRING_AGG with WITHIN GROUP (ORDER BY): added in 2017
 --     - JSON_QUERY: added in 2016
---   Note: JSON_ARRAYAGG and JSON_OBJECTAGG are NOT in standalone SQL
---   Server 2022 (only Azure SQL Database, Fabric, and the upcoming
---   SQL Server 2025). This script therefore builds JSON arrays via
---   STRING_AGG over JSON_OBJECT results, then wraps the resulting
---   string in JSON_QUERY so it nests correctly inside JSON_OBJECT
---   rather than being escaped as a string.
+--   Note: JSON_ARRAYAGG and JSON_OBJECTAGG are NOT in standalone
+--   SQL Server 2022 (only Azure SQL Database, Fabric, and the
+--   upcoming SQL Server 2025). This script therefore builds JSON
+--   arrays via STRING_AGG over JSON_OBJECT, then wraps the result
+--   in JSON_QUERY so it nests correctly inside JSON_OBJECT rather
+--   than being escaped as a string.
 --
--- Catalog source: sys.* views rather than INFORMATION_SCHEMA.
+-- Catalog source: sys.* views (not INFORMATION_SCHEMA).
 --   sys.* exposes is_identity, is_computed, default_object_id,
 --   index types, and other SQL-Server-specific metadata that
 --   INFORMATION_SCHEMA omits or returns inconsistently. This
---   parallels how postgres-xray uses pg_catalog instead of
+--   parallels how postgres-xray uses pg_catalog rather than
 --   information_schema.
 --
 -- Usage:
 --   1. Switch to the target database first:  USE my_database;
---   2. Run this script. The result is a single column 'schema_dump'
+--   2. Run this script. The result is a single column schema_dump
 --      containing one row of JSON.
 --
 -- What's captured:
---   tables     base tables, with kind, partition flag, row count and
+--   tables     base tables with kind, partition flag, row count and
 --              size estimate, primary key, foreign keys, unique
 --              constraints, check_constraint_count, indexes,
 --              trigger_count, and columns
@@ -38,38 +41,26 @@
 --              kind, language, arguments, return type), no bodies
 --   sequences  user-defined sequences (schema and name), no start,
 --              increment, or current value
+--   packages   empty array (SQL Server has no package concept)
 --
 -- What's deliberately excluded for privacy:
---   - column default value literals
---   - check constraint expressions (only counts)
+--   - column default value literals (presence flag only)
+--   - check constraint expressions (count only)
 --   - view bodies, routine bodies, trigger bodies
---   - data row contents
+--   - table and column descriptions (free text, could be anything)
 --   - sequence numeric attributes
---   - extended properties (column descriptions, table comments)
+--   - data row contents
 --
--- Existence is recorded via counts (e.g. check_constraint_count,
--- trigger_count); contents are not.
---
--- Notes on SQL Server features intentionally not surfaced in v1:
---   - Computed columns are flagged via is_generated, but the
---     computed expression itself is not emitted.
---   - Filtered indexes are listed without their filter predicate.
---   - Index type (CLUSTERED, NONCLUSTERED, CLUSTERED COLUMNSTORE,
---     NONCLUSTERED COLUMNSTORE, XML, SPATIAL) is exposed via the
---     method field but no additional SQL-Server-specific options.
---   - Temporal tables, memory-optimized tables, and graph tables
---     appear as ordinary tables; their special status is not flagged.
---
--- To filter by schema: this script applies LIKE N'%' (all schemas) by
--- default. If you want a subset, find-replace every occurrence of
--- LIKE N'%' with a pattern such as LIKE N'sales%'. There are several;
--- they all use the same literal so a single find-replace covers them.
+-- SQL Server-specific notes:
+--   - We avoid DECLARE/SET variables so the script runs cleanly in
+--     batch-splitting environments (like sqlize.online).
+--   - Row count and size come from sys.dm_db_partition_stats.
 -- =====================================================================
 
 WITH
 
 -- =====================================================================
--- COLUMNS per table
+-- COLUMNS
 --
 -- data_type is rendered to match the way columns are typically
 -- declared in DDL (e.g. 'nvarchar(50)', 'decimal(10,2)',
@@ -135,7 +126,7 @@ cols AS (
 ),
 
 -- =====================================================================
--- PRIMARY KEY per table
+-- PRIMARY KEYS
 --
 -- Column names are emitted as a JSON array of strings; we quote and
 -- escape via STRING_ESCAPE so identifiers containing quotes, slashes,
@@ -168,7 +159,7 @@ pks AS (
 ),
 
 -- =====================================================================
--- FOREIGN KEYS per table
+-- FOREIGN KEYS
 --
 -- Built in two stages: first a per-constraint row with column arrays
 -- assembled from scalar subqueries, then aggregated into one JSON
@@ -240,7 +231,7 @@ fks AS (
 ),
 
 -- =====================================================================
--- UNIQUE CONSTRAINTS per table
+-- UNIQUE CONSTRAINTS
 --
 -- These are unique indexes promoted to constraint status
 -- (is_unique_constraint = 1 in sys.indexes).
@@ -287,7 +278,7 @@ uqs AS (
 ),
 
 -- =====================================================================
--- CHECK CONSTRAINT count per table
+-- CHECK CONSTRAINT COUNTS
 --
 -- Just a count; the predicate is excluded for privacy.
 -- =====================================================================
@@ -310,8 +301,7 @@ checks AS (
 ),
 
 -- =====================================================================
--- INDEXES per table (excluding primary keys and unique constraints,
--- which are already covered above)
+-- INDEXES (excludes PK-backing and unique-backing indexes)
 --
 -- type_desc values seen here: NONCLUSTERED, CLUSTERED,
 -- NONCLUSTERED COLUMNSTORE, CLUSTERED COLUMNSTORE, XML, SPATIAL.
@@ -372,7 +362,7 @@ idx AS (
 ),
 
 -- =====================================================================
--- TRIGGER count per table
+-- TRIGGER COUNTS
 -- =====================================================================
 trgs AS (
     SELECT
@@ -394,7 +384,7 @@ trgs AS (
 ),
 
 -- =====================================================================
--- PARTITIONED tables
+-- PARTITIONED TABLES
 --
 -- A table is partitioned if its heap or clustered index has more
 -- than one partition. Non-partitioned tables don't appear here.
@@ -410,7 +400,7 @@ partitioned AS (
 ),
 
 -- =====================================================================
--- TABLE METADATA (kind, partition flag, stats)
+-- TABLE METADATA
 --
 -- Stats note: row counts and used page bytes come from
 -- sys.dm_db_partition_stats, which reflects the most recent
@@ -455,7 +445,7 @@ tbl_meta AS (
 ),
 
 -- =====================================================================
--- TABLES JSON
+-- TABLES
 -- =====================================================================
 tables_json AS (
     SELECT N'[' + STRING_AGG(
@@ -685,7 +675,7 @@ sequences_json AS (
 ),
 
 -- =====================================================================
--- METADATA block
+-- METADATA
 -- =====================================================================
 schemas_list AS (
     SELECT N'[' + STRING_AGG(

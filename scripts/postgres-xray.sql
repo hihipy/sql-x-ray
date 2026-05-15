@@ -1,40 +1,52 @@
 -- =====================================================================
--- postgres-xray.sql
+-- sql-x-ray for PostgreSQL 12+
 -- =====================================================================
--- sql-x-ray: See the structure, not the data.
--- https://github.com/hihipy/sql-x-ray
+-- Generates a privacy-safe structural JSON dump of a database schema,
+-- suitable as priming context for an LLM.
 --
--- Privacy-safe PostgreSQL schema introspection for LLM context.
+-- Repository: https://github.com/hihipy/sql-x-ray
+-- License:    CC BY-NC-SA 4.0
 --
--- WHAT THIS DOES
---   Outputs a single jsonb document describing the SHAPE of a PostgreSQL
---   database: tables, columns, types, relationships, indexes, and
---   constraint existence. Designed to be fed to any LLM as priming
---   context so it can write accurate queries against your schema.
+-- Target: PostgreSQL 12+
+--   Tested on PostgreSQL 17 (with PostGIS) and PostgreSQL 18. No
+--   extensions required. Uses jsonb_agg, jsonb_build_object, and
+--   standard pg_catalog views.
 --
--- WHAT THIS DELIBERATELY DOES NOT INCLUDE
---   This script never extracts values that could carry sensitive data:
---     - No enum value labels (could be clinical / financial / personal)
---     - No check constraint expressions (could contain literal values)
---     - No default-value literals (could contain literal values)
---     - No view definitions or function bodies (could contain logic
---       that filters or describes sensitive data)
---     - No table/column descriptions (free text, could be anything)
---     - No row data of any kind
---   It DOES include the *existence* and *count* of each of the above,
---   so an LLM knows the construct is there without seeing what's in it.
+-- Catalog source: pg_catalog.* views.
+--   pg_catalog exposes attidentity, attgenerated, partition state,
+--   index access methods, and other PostgreSQL-specific metadata
+--   that information_schema omits or normalizes away. Using
+--   pg_catalog directly avoids the lossy translation layer.
 --
--- COMPATIBILITY
---   PostgreSQL 12 or newer. No extensions required.
---   Tested on PostgreSQL 17 (with PostGIS) and PostgreSQL 18.
+-- Usage:
+--   1. Edit the `params` CTE below to choose a schema filter
+--      ('public', 'app_%' for LIKE, '%' for all user schemas).
+--   2. Run this script. The result is a single cell containing
+--      one row of pretty-printed JSON.
 --
--- USAGE
---   Edit the `params` CTE below to target a schema, then run.
---   Result is a single cell containing a pretty-printed JSON document.
---   Save the cell contents as schema.json and feed to your LLM.
+-- What's captured:
+--   tables     base tables with kind, partition flag, row count and
+--              size estimate, primary key, foreign keys, unique
+--              constraints, check_constraint_count, indexes,
+--              trigger_count, and columns
+--   views      schema-qualified name and column list with types
+--   routines   user-defined functions and procedures (name, kind,
+--              language, arguments, return type), no bodies
+--   sequences  user-defined sequences (name only, no start,
+--              increment, or current value)
+--   packages   empty array (PostgreSQL has no package concept)
 --
--- LICENSE
---   CC BY-NC-SA 4.0 - https://creativecommons.org/licenses/by-nc-sa/4.0/
+-- What's deliberately excluded for privacy:
+--   - column default value literals (presence flag only)
+--   - check constraint expressions (count only)
+--   - view bodies, routine bodies, trigger bodies
+--   - enum value labels (type marked as "enum" without the values)
+--   - table and column comments (free text, could be anything)
+--   - sequence numeric attributes
+--   - data row contents
+--
+-- Existence is recorded via counts (e.g. check_constraint_count,
+-- trigger_count); contents are not.
 -- =====================================================================
 
 WITH params AS (
@@ -111,7 +123,7 @@ target_schemas AS (
 ),
 
 -- =====================================================================
--- COLUMNS (structure only, no defaults, no descriptions)
+-- COLUMNS
 -- =====================================================================
 cols AS (
     SELECT
@@ -163,7 +175,7 @@ pks AS (
 ),
 
 -- =====================================================================
--- FOREIGN KEYS (the relationship map)
+-- FOREIGN KEYS
 -- =====================================================================
 fks AS (
     SELECT
@@ -239,7 +251,7 @@ uqs AS (
 ),
 
 -- =====================================================================
--- CHECK CONSTRAINT COUNTS (existence only, no expressions)
+-- CHECK CONSTRAINT COUNTS
 -- =====================================================================
 checks AS (
     SELECT
@@ -255,7 +267,7 @@ checks AS (
 ),
 
 -- =====================================================================
--- INDEXES (with proper handling of expression columns and INCLUDE)
+-- INDEXES (excludes PK-backing and unique-backing indexes)
 -- Excludes indexes backing PK / unique constraints to avoid duplication.
 -- Expression indexes (e.g. lower(name)) emit "<expression>" in place of
 -- the column name to signal existence without revealing content.
@@ -310,7 +322,7 @@ idx AS (
 ),
 
 -- =====================================================================
--- TRIGGER COUNTS (existence only, no definitions)
+-- TRIGGER COUNTS
 -- =====================================================================
 trgs AS (
     SELECT
@@ -349,7 +361,7 @@ inh AS (
 ),
 
 -- =====================================================================
--- TABLE METADATA (kind, partition flag)
+-- TABLE METADATA
 -- =====================================================================
 tbl_meta AS (
     SELECT
@@ -380,7 +392,7 @@ stats AS (
 ),
 
 -- =====================================================================
--- ASSEMBLE TABLES
+-- TABLES
 -- =====================================================================
 tables_json AS (
     SELECT jsonb_agg(
@@ -415,7 +427,7 @@ tables_json AS (
 ),
 
 -- =====================================================================
--- VIEWS / MATERIALIZED VIEWS (existence + column list only)
+-- VIEWS
 -- =====================================================================
 view_cols AS (
     SELECT
@@ -462,7 +474,7 @@ views_json AS (
 ),
 
 -- =====================================================================
--- ROUTINES (signatures only, no bodies)
+-- ROUTINES
 -- Filters extension-owned and built-in C/internal functions.
 -- =====================================================================
 routines_json AS (
@@ -494,7 +506,7 @@ routines_json AS (
 ),
 
 -- =====================================================================
--- SEQUENCES (metadata only)
+-- SEQUENCES
 -- =====================================================================
 sequences_json AS (
     SELECT jsonb_agg(
@@ -510,7 +522,7 @@ sequences_json AS (
 ),
 
 -- =====================================================================
--- USER-DEFINED TYPES (kind and count only, no value labels)
+-- USER-DEFINED TYPES
 -- For domains we include the base type since it's a structural fact, not
 -- a constraint value (e.g. domain `email` is built on `text`).
 -- =====================================================================
