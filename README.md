@@ -4,13 +4,13 @@
 
 `sql-x-ray` produces a privacy-safe structural dump of a SQL database, designed as priming context for an LLM. Structure only, never values: no defaults, no constraint expressions, no view bodies, no enum labels, no sample data. Safe to share with any LLM regardless of what your database contains.
 
----
+***
 
 ## Why this exists
 
 Copying a full schema into an LLM chat fails on size for any non-trivial database, and even when it fits, view bodies and CHECK expressions can leak business logic or literal values. Sample queries are slow and error-prone. `sql-x-ray` gives the LLM exactly what it needs to write accurate queries against your schema (tables, columns, types, relationships, indexes) and nothing it shouldn't have.
 
----
+***
 
 ## Try it in your browser
 
@@ -22,7 +22,7 @@ The fastest way to see the output is to run it against a preloaded sample databa
 4. Click **Run SQL code**
 5. The single result cell contains the full dump (JSON for most engines, Markdown for Firebird). Copy it, paste into your LLM of choice, done.
 
-Sample databases available on sqlize.online:
+Sample databases available on [sqlize.online](https://sqlize.online):
 
 | Engine | Sample schema |
 |---|---|
@@ -43,7 +43,7 @@ Other SQL playgrounds worth knowing:
 - [Aiven Postgres Playground](https://aiven.io/tools/pg-playground): PostgreSQL via WebAssembly, entirely in your browser.
 - [playcode.io SQL Playground](https://playcode.io/sql-playground): PostgreSQL via PGlite with preloaded Chinook (music store) and Northwind (e-commerce).
 
----
+***
 
 ## What the output looks like
 
@@ -115,7 +115,7 @@ A trimmed example dump of a tiny e-commerce schema:
 
 An LLM can use this to write a correct join between `orders` and `customers` (right FK direction, right types, right nullability) without ever seeing a single customer record.
 
----
+***
 
 ## Run it on your own database
 
@@ -132,7 +132,7 @@ To feed the dump to an LLM, paste it into a chat with a short intro:
 > { ...paste the dump... }
 > ```
 
----
+***
 
 ## What's in the dump
 
@@ -155,7 +155,7 @@ For routines: schema, name, kind (function, procedure, aggregate, window), langu
 
 For sequences and user-defined types: existence and basic metadata only. Enum value labels are excluded by design.
 
----
+***
 
 ## What you can build from the dump
 
@@ -200,9 +200,9 @@ erDiagram
     }
 ```
 
-**DBML for dbdiagram.io** if you want a more polished, browsable diagram. Same approach, different output syntax.
+**DBML for [dbdiagram.io](https://dbdiagram.io)** if you want a more polished, browsable diagram. Same approach, different output syntax.
 
-**PlantUML, Graphviz/DOT, D2** all work too — any text-based diagram language an LLM knows.
+**PlantUML**, **Graphviz/DOT**, **D2** all work too — any text-based diagram language an LLM knows.
 
 ### Code generation
 
@@ -248,7 +248,7 @@ The LLM has the tables, the columns, the types, and the relationships in one pla
 - **Test fixture generators** that produce plausible synthetic rows for each table
 - **Migration script scaffolding** ("here's how to add a column" prompts work well with the full schema as context)
 
----
+***
 
 ## What's never in the dump
 
@@ -264,7 +264,7 @@ The LLM has the tables, the columns, the types, and the relationships in one pla
 
 Existence is still recorded where useful. `check_constraint_count: 3` tells the LLM there are check constraints on this table without revealing what they enforce. Expression indexes show `<expression>` in their column list as a placeholder.
 
----
+***
 
 ## Engine support
 
@@ -292,9 +292,9 @@ If you specifically need JSON from Firebird, the natural path is to wait for nat
 
 ### MySQL and MariaDB on hosted sandboxes
 
-A note on the MySQL and MariaDB scripts: a small number of hosted SQL sandbox environments (including sqlize.online) ship an `information_schema` with mixed `utf8mb3` collations and a query optimizer that drops explicit collation conversions during CTE materialization. On those environments some cross-CTE joins (most visibly `routines` and `trigger_count`) can come back empty even though the script handles the collation mismatch correctly. Standard MySQL 8+/9+ and MariaDB 10.5+ installations use `utf8mb4` throughout `information_schema` and are not affected.
+A note on the MySQL and MariaDB scripts: a small number of hosted SQL sandbox environments (including [sqlize.online](https://sqlize.online)) ship an `information_schema` with mixed `utf8mb3` collations and a query optimizer that drops explicit collation conversions during CTE materialization. On those environments some cross-CTE joins (most visibly `routines` and `trigger_count`) can come back empty even though the script handles the collation mismatch correctly. Standard MySQL 8+/9+ and MariaDB 10.5+ installations use `utf8mb4` throughout `information_schema` and are not affected.
 
----
+***
 
 ## Script conventions
 
@@ -365,7 +365,7 @@ Engine-specific sections keep their own descriptive names. PostgreSQL has `INHER
 - Parenthetical clarifications are lowercase and added only when they convey non-obvious information. Example: `INDEXES (excludes PK-backing and unique-backing indexes)` is non-obvious; `COLUMNS (column metadata)` would just restate the title and is omitted.
 - Inline comments inside CTEs are mixed-case prose. They explain *why* (engine quirks, catalog gotchas, version constraints), not *what* (the SQL itself should be readable on its own).
 
----
+***
 
 ## Requirements
 
@@ -373,7 +373,7 @@ Engine-specific sections keep their own descriptive names. PostgreSQL has `INHER
 - Read permission on the database's system catalogs and `information_schema`
 - No installs, no extensions, no Python required
 
----
+***
 
 ## Security and privacy
 
@@ -389,7 +389,7 @@ The privacy stance is strong but not infinite. The following can appear in a dum
 - **Estimated row counts.** Aggregate counts are universally safe under HIPAA, GDPR, and similar regimes, but in very small populations a count could narrow identification. Set `include_stats = FALSE` if needed.
 - **Foreign key target names.** Reveal which tables relate to which.
 
----
+***
 
 ## Using the dump with an LLM
 
@@ -406,7 +406,7 @@ Before pasting a dump into any LLM:
 
 The author and contributors of `sql-x-ray` accept no liability for misuse, data exposure, regulatory consequences, or contractual breaches that result from sharing dump output with third-party services. The tool's privacy properties are a starting point, not a substitute for institutional review.
 
----
+***
 
 ## License
 
