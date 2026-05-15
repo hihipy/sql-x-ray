@@ -2,15 +2,15 @@
 
 **See the structure, not the data.**
 
-`sql-x-ray` produces a privacy-safe structural dump of a SQL database, designed as priming context for an LLM. Structure only, never values: no defaults, no constraint expressions, no view bodies, no enum labels, no sample data. Safe to share with any LLM regardless of what your database contains.
+[`sql-x-ray`](https://github.com/hihipy/sql-x-ray) produces a privacy-safe structural dump of a SQL database, designed as priming context for an LLM. Structure only, never values: no defaults, no constraint expressions, no view bodies, no enum labels, no sample data. Safe to share with any LLM regardless of what your database contains.
 
-***
+---
 
 ## Why this exists
 
-Copying a full schema into an LLM chat fails on size for any non-trivial database, and even when it fits, view bodies and CHECK expressions can leak business logic or literal values. Sample queries are slow and error-prone. `sql-x-ray` gives the LLM exactly what it needs to write accurate queries against your schema (tables, columns, types, relationships, indexes) and nothing it shouldn't have.
+Copying a full schema into an LLM chat fails on size for any non-trivial database, and even when it fits, view bodies and [`CHECK`](https://en.wikipedia.org/wiki/Check_constraint) expressions can leak business logic or literal values. Sample queries are slow and error-prone. `sql-x-ray` gives the LLM exactly what it needs to write accurate queries against your schema (tables, columns, types, relationships, indexes) and nothing it shouldn't have.
 
-***
+---
 
 ## Try it in your browser
 
@@ -18,32 +18,32 @@ The fastest way to see the output is to run it against a preloaded sample databa
 
 1. Open [sqlize.online](https://sqlize.online)
 2. Pick a ReadOnly sample database from the engine dropdown
-3. Paste the matching script from this repo (e.g. `scripts/postgres-xray.sql`)
+3. Paste the matching script from this repo (e.g. [`scripts/postgres-xray.sql`](https://github.com/hihipy/sql-x-ray/blob/main/scripts/postgres-xray.sql))
 4. Click **Run SQL code**
-5. The single result cell contains the full dump (JSON for most engines, Markdown for Firebird). Copy it, paste into your LLM of choice, done.
+5. The single result cell contains the full dump ([JSON](https://www.json.org/) for most engines, [Markdown](https://daringfireball.net/projects/markdown/) for Firebird). Copy it, paste into your LLM of choice, done.
 
 Sample databases available on [sqlize.online](https://sqlize.online):
 
 | Engine | Sample schema |
 |---|---|
-| PostgreSQL 18 [Bookings](https://postgrespro.com/community/demodb) (ReadOnly) | Airline reservations: flights, bookings, tickets, boarding passes, seats |
-| PostgreSQL 17 + PostGIS [WorkShop](https://postgis.net/workshops/postgis-intro/) (ReadOnly) | Spatial and geographic data |
-| MySQL 9.7 [Sakila](https://dev.mysql.com/doc/sakila/en/) (ReadOnly) | DVD rental store (the canonical sample) |
-| MariaDB 11.8 [OpenFlights](https://openflights.org/data.html) (ReadOnly) | Airport, airline, and route data |
-| MS SQL Server 2022 [AdventureWorks](https://learn.microsoft.com/en-us/sql/samples/adventureworks-install-configure) (ReadOnly) | Microsoft's bicycle company (68 tables, 5 schemas) |
-| Oracle Database 19c [HR](https://docs.oracle.com/en/database/oracle/oracle-database/19/comsc/installing-sample-schemas.html) | Classic Oracle HR sample (employees, departments, jobs) |
-| Firebird 4.0 [Employee](https://firebirdsql.org/manual/qsg2-installing.html) | Firebird's bundled sample |
-| SQLite 3 Preloaded | Custom lab and survey database with Palmer Penguins data (13 tables across staff, experiments, equipment, and penguins) |
+| [PostgreSQL 18 Bookings](https://postgrespro.com/community/demodb) (ReadOnly) | Airline reservations: flights, bookings, tickets, boarding passes, seats |
+| [PostgreSQL 17 + PostGIS WorkShop](https://postgis.net/workshops/postgis-intro/) (ReadOnly) | Spatial and geographic data |
+| [MySQL 9.7 Sakila](https://dev.mysql.com/doc/sakila/en/) (ReadOnly) | DVD rental store (the canonical sample) |
+| [MariaDB 11.8 OpenFlights](https://openflights.org/data.html) (ReadOnly) | Airport, airline, and route data |
+| [MS SQL Server 2022 AdventureWorks](https://learn.microsoft.com/en-us/sql/samples/adventureworks-install-configure) (ReadOnly) | Microsoft's bicycle company (68 tables, 5 schemas) |
+| [Oracle Database 19c HR](https://docs.oracle.com/en/database/oracle/oracle-database/19/comsc/installing-sample-schemas.html) | Classic Oracle HR sample (employees, departments, jobs) |
+| [Firebird 4.0 Employee](https://firebirdsql.org/manual/qsg2-installing.html) | Firebird's bundled sample |
+| SQLite 3 Preloaded | Custom lab and survey database with [Palmer Penguins](https://allisonhorst.github.io/palmerpenguins/) data (13 tables across staff, experiments, equipment, and penguins) |
 
 This is also the right way to validate a script after editing it. Test against a known schema before pointing it at your real database.
 
 Other SQL playgrounds worth knowing:
 
 - [DB Fiddle](https://www.db-fiddle.com): PostgreSQL, MySQL, SQLite, SQL Server. Clean two-pane interface.
-- [Aiven Postgres Playground](https://aiven.io/tools/pg-playground): PostgreSQL via WebAssembly, entirely in your browser.
-- [playcode.io SQL Playground](https://playcode.io/sql-playground): PostgreSQL via PGlite with preloaded Chinook (music store) and Northwind (e-commerce).
+- [Aiven Postgres Playground](https://aiven.io/tools/pg-playground): PostgreSQL via [WebAssembly](https://webassembly.org/), entirely in your browser.
+- [playcode.io SQL Playground](https://playcode.io/sql-playground): PostgreSQL via [PGlite](https://pglite.dev/) with preloaded [Chinook](https://github.com/lerocha/chinook-database) (music store) and [Northwind](https://github.com/Microsoft/sql-server-samples/tree/master/samples/databases/northwind-pubs) (e-commerce).
 
-***
+---
 
 ## What the output looks like
 
@@ -59,6 +59,7 @@ A trimmed example dump of a tiny e-commerce schema:
     "generated_at": "2026-05-14T14:30:00Z",
     "schema_filter": "%",
     "schemas": ["public"],
+    "object_counts": { "tables": 4, "views": 0, "routines": 0, "sequences": 1, "types": 0 },
     "privacy_note": "This document contains only structural metadata..."
   },
   "tables": [
@@ -115,13 +116,13 @@ A trimmed example dump of a tiny e-commerce schema:
 
 An LLM can use this to write a correct join between `orders` and `customers` (right FK direction, right types, right nullability) without ever seeing a single customer record.
 
-***
+---
 
 ## Run it on your own database
 
-1. Open the script for your engine in the `scripts/` folder
+1. Open the script for your engine in the [`scripts/`](https://github.com/hihipy/sql-x-ray/tree/main/scripts) folder
 2. Adjust the `params` block at the top of the file (schema filter, whether to include row counts, whether to pretty-print)
-3. Run the script in any SQL client (DBeaver, DataGrip, psql, pgAdmin, Metabase, Insight, SSMS, Snowsight)
+3. Run the script in any SQL client ([DBeaver](https://dbeaver.io/), [DataGrip](https://www.jetbrains.com/datagrip/), [psql](https://www.postgresql.org/docs/current/app-psql.html), [pgAdmin](https://www.pgadmin.org/), [Metabase](https://www.metabase.com/), [Insight](https://insight.openclinica.com/), [SSMS](https://learn.microsoft.com/en-us/sql/ssms/), [Snowsight](https://docs.snowflake.com/en/user-guide/ui-snowsight))
 4. The result is a single cell containing a JSON document. Copy and save it as `schema.json`.
 
 To feed the dump to an LLM, paste it into a chat with a short intro:
@@ -132,7 +133,7 @@ To feed the dump to an LLM, paste it into a chat with a short intro:
 > { ...paste the dump... }
 > ```
 
-***
+---
 
 ## What's in the dump
 
@@ -142,7 +143,7 @@ For every table:
 - Estimated row count and on-disk size
 - All columns with name, position, data type, nullability, identity and generated-column flags, and whether a default exists
 - Primary key columns
-- Foreign keys with from-columns, target schema/table/columns, and ON UPDATE / ON DELETE actions
+- Foreign keys with from-columns, target schema/table/columns, and `ON UPDATE` / `ON DELETE` actions
 - Unique constraints with their column lists
 - Check constraint count (existence only)
 - All secondary indexes (excludes indexes backing PK and unique constraints to avoid duplication) with name, method, uniqueness, partial-index flag, columns (including expression placeholders), and INCLUDE columns
@@ -155,15 +156,15 @@ For routines: schema, name, kind (function, procedure, aggregate, window), langu
 
 For sequences and user-defined types: existence and basic metadata only. Enum value labels are excluded by design.
 
-***
+---
 
 ## What you can build from the dump
 
-The dump is structural metadata in a predictable JSON shape. Once you have it, plenty of useful artifacts fall out almost for free, mostly by handing the JSON to an LLM with a short instruction.
+The dump is structural metadata in a predictable [JSON](https://www.json.org/) shape. Once you have it, plenty of useful artifacts fall out almost for free, mostly by handing the JSON to an LLM with a short instruction. Programmatic access works too: anything that reads JSON ([`jq`](https://jqlang.github.io/jq/), Python's [`json`](https://docs.python.org/3/library/json.html), JavaScript's `JSON.parse`) can walk the structure directly.
 
 ### Visual diagrams
 
-**Mermaid ER diagrams** for documentation, READMEs, or wikis. GitHub, GitLab, Notion, Obsidian, and most static-site generators render Mermaid natively. Prompt:
+**[Mermaid](https://mermaid.js.org/) ER diagrams** for documentation, READMEs, or wikis. [GitHub](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams), [GitLab](https://docs.gitlab.com/ee/user/markdown.html#diagrams-and-flowcharts), [Notion](https://www.notion.so/help/guides/diagrams), [Obsidian](https://help.obsidian.md/Editing+and+formatting/Advanced+formatting+syntax#Diagram), and most static-site generators render Mermaid natively. Prompt:
 
 > Convert this schema dump into a Mermaid `erDiagram`. Show primary keys with `PK`, foreign keys with `FK`, and connect tables using FK relationships with proper cardinality.
 
@@ -200,20 +201,20 @@ erDiagram
     }
 ```
 
-**DBML for [dbdiagram.io](https://dbdiagram.io)** if you want a more polished, browsable diagram. Same approach, different output syntax.
+**[DBML](https://dbml.dbdiagram.io/home/) for [dbdiagram.io](https://dbdiagram.io/)** if you want a more polished, browsable diagram. Same approach, different output syntax.
 
-**PlantUML**, **Graphviz/DOT**, **D2** all work too — any text-based diagram language an LLM knows.
+**[PlantUML](https://plantuml.com/), [Graphviz/DOT](https://graphviz.org/), [D2](https://d2lang.com/)** all work too: any text-based diagram language an LLM knows.
 
 ### Code generation
 
 | Target | What to ask for |
 |---|---|
-| Python ORMs | SQLAlchemy 2.0 `Mapped[]` models, Django models, Tortoise ORM, peewee |
-| TypeScript / JS | Prisma schemas, TypeORM entities, Drizzle ORM schemas, Zod validators |
-| Go | GORM structs, sqlc queries with `CREATE TABLE` references |
-| Type definitions | Pydantic v2 models, TypeScript interfaces, JSON Schema, protobuf, GraphQL SDL |
-| API specs | OpenAPI/Swagger, GraphQL schemas with resolvers stubbed |
-| Migration tools | Alembic, Flyway, Liquibase, dbmate skeletons |
+| Python ORMs | [SQLAlchemy](https://www.sqlalchemy.org/) 2.0 `Mapped[]` models, [Django](https://docs.djangoproject.com/en/stable/topics/db/models/) models, [Tortoise ORM](https://tortoise.github.io/), [peewee](http://docs.peewee-orm.com/) |
+| TypeScript / JS | [Prisma](https://www.prisma.io/) schemas, [TypeORM](https://typeorm.io/) entities, [Drizzle ORM](https://orm.drizzle.team/) schemas, [Zod](https://zod.dev/) validators |
+| Go | [GORM](https://gorm.io/) structs, [sqlc](https://sqlc.dev/) queries with `CREATE TABLE` references |
+| Type definitions | [Pydantic](https://docs.pydantic.dev/) v2 models, [TypeScript](https://www.typescriptlang.org/) interfaces, [JSON Schema](https://json-schema.org/), [protobuf](https://protobuf.dev/), [GraphQL SDL](https://graphql.org/learn/schema/) |
+| API specs | [OpenAPI/Swagger](https://www.openapis.org/), [GraphQL](https://graphql.org/) schemas with resolvers stubbed |
+| Migration tools | [Alembic](https://alembic.sqlalchemy.org/), [Flyway](https://www.red-gate.com/products/flyway/), [Liquibase](https://www.liquibase.com/), [dbmate](https://github.com/amacneil/dbmate) skeletons |
 
 Generic prompt: "Generate SQLAlchemy 2.0 declarative models from this schema dump. Use `Mapped[]` annotations, match column types properly, and add `relationship()` calls based on the foreign keys."
 
@@ -227,7 +228,7 @@ Generic prompt: "Generate SQLAlchemy 2.0 declarative models from this schema dum
 
 - **Orphan tables** with no foreign keys in or out, often dead tables or audit logs worth flagging
 - **Hub tables** with many incoming foreign keys, central entities like `users` or `orders` worth understanding first
-- **Naming convention audits** for column suffixes (`_id`, `_at`, `_count`), casing (snake vs camel), plural vs singular table names
+- **Naming convention audits** for column suffixes (`_id`, `_at`, `_count`), casing ([snake](https://en.wikipedia.org/wiki/Snake_case) vs [camel](https://en.wikipedia.org/wiki/Camel_case)), plural vs singular table names
 - **Schema diff** by running the script before and after a migration and comparing the two JSON outputs
 - **Missing PK audit** showing tables with no primary key declared
 - **FK without index** showing relationships likely to cause slow joins (where the engine reports indexes)
@@ -248,7 +249,7 @@ The LLM has the tables, the columns, the types, and the relationships in one pla
 - **Test fixture generators** that produce plausible synthetic rows for each table
 - **Migration script scaffolding** ("here's how to add a column" prompts work well with the full schema as context)
 
-***
+---
 
 ## What's never in the dump
 
@@ -264,37 +265,54 @@ The LLM has the tables, the columns, the types, and the relationships in one pla
 
 Existence is still recorded where useful. `check_constraint_count: 3` tells the LLM there are check constraints on this table without revealing what they enforce. Expression indexes show `<expression>` in their column list as a placeholder.
 
-***
+---
 
 ## Engine support
 
-| Engine                                              | Script                     | Status                     | Minimum version  |
-|-----------------------------------------------------|----------------------------|----------------------------|------------------|
-| [Firebird](https://dbdb.io/db/firebird)             | `scripts/firebird-xray.sql`   | Stable                     | Firebird 4.0     |
-| [MariaDB](https://dbdb.io/db/mariadb)               | `scripts/mariadb-xray.sql`    | Stable                     | MariaDB 10.5     |
-| [MySQL](https://dbdb.io/db/mysql)                   | `scripts/mysql-xray.sql`      | Stable                     | MySQL 8.0.16     |
-| [Oracle](https://dbdb.io/db/oracle)                 | `scripts/oracle-xray.sql`     | Stable                     | Oracle 18c       |
-| [PostgreSQL](https://dbdb.io/db/postgresql)         | `scripts/postgres-xray.sql`   | Stable                     | PostgreSQL 12    |
-| [SQL Server](https://dbdb.io/db/sql-server)         | `scripts/sqlserver-xray.sql`  | Stable                     | SQL Server 2022  |
-| [SQLite](https://dbdb.io/db/sqlite)                 | `scripts/sqlite-xray.sql`     | Stable                     | SQLite 3.44      |
-| [BigQuery](https://dbdb.io/db/bigquery)             | `scripts/bigquery-xray.sql`   | Draft (pending validation) | GoogleSQL        |
-| [Snowflake](https://dbdb.io/db/snowflake)           | `scripts/snowflake-xray.sql`  | Planned                    |                  |
+| Engine | Script | Status | Minimum version |
+|---|---|---|---|
+| [PostgreSQL](https://dbdb.io/db/postgresql) | [`scripts/postgres-xray.sql`](https://github.com/hihipy/sql-x-ray/blob/main/scripts/postgres-xray.sql) | Stable | [PostgreSQL 12](https://www.postgresql.org/docs/12/release-12.html) |
+| [MySQL](https://dbdb.io/db/mysql) | [`scripts/mysql-xray.sql`](https://github.com/hihipy/sql-x-ray/blob/main/scripts/mysql-xray.sql) | Stable | [MySQL 8.0.16](https://dev.mysql.com/doc/relnotes/mysql/8.0/en/news-8-0-16.html) |
+| [MariaDB](https://dbdb.io/db/mariadb) | [`scripts/mariadb-xray.sql`](https://github.com/hihipy/sql-x-ray/blob/main/scripts/mariadb-xray.sql) | Stable | [MariaDB 10.5](https://mariadb.com/kb/en/changes-improvements-in-mariadb-105/) |
+| [SQL Server](https://dbdb.io/db/sql-server) | [`scripts/sqlserver-xray.sql`](https://github.com/hihipy/sql-x-ray/blob/main/scripts/sqlserver-xray.sql) | Stable | [SQL Server 2022](https://learn.microsoft.com/en-us/sql/sql-server/what-s-new-in-sql-server-2022) |
+| [Firebird](https://dbdb.io/db/firebird) | [`scripts/firebird-xray.sql`](https://github.com/hihipy/sql-x-ray/blob/main/scripts/firebird-xray.sql) | Stable (Markdown output) | [Firebird 4.0](https://firebirdsql.org/en/firebird-4-0/) |
+| [Oracle](https://dbdb.io/db/oracle) | [`scripts/oracle-xray.sql`](https://github.com/hihipy/sql-x-ray/blob/main/scripts/oracle-xray.sql) | Stable | [Oracle 18c](https://docs.oracle.com/en/database/oracle/oracle-database/18/) |
+| [SQLite](https://dbdb.io/db/sqlite) | [`scripts/sqlite-xray.sql`](https://github.com/hihipy/sql-x-ray/blob/main/scripts/sqlite-xray.sql) | Stable | [SQLite 3.44](https://www.sqlite.org/releaselog/3_44_0.html) |
+| [BigQuery](https://dbdb.io/db/bigquery) | [`scripts/bigquery-xray.sql`](https://github.com/hihipy/sql-x-ray/blob/main/scripts/bigquery-xray.sql) | Draft (pending validation) | [GoogleSQL](https://cloud.google.com/bigquery/docs/introduction-sql) |
+| [Snowflake](https://dbdb.io/db/snowflake) | `scripts/snowflake-xray.sql` | Planned | |
 
-Engine names link to their entry in [Database of Databases](https://dbdb.io), the database encyclopedia maintained by Carnegie Mellon University.
+Engine names link to their entry in [Database of Databases](https://dbdb.io), the database encyclopedia maintained by [Carnegie Mellon University](https://db.cs.cmu.edu/).
 
 ### Why Firebird outputs Markdown instead of JSON
 
-Firebird 4.0 has no native JSON functions. `JSON_OBJECT`, `JSON_ARRAYAGG`, and `JSON_QUERY` are still in proposal stage for future releases (likely 6.0+). Building JSON in Firebird 4.0 would mean fully manual string concatenation with explicit quote escaping for every key and value, plus carefully tracking opening and closing braces by hand. That path is doable but verbose and error-prone, and `LIST()` does not support `ORDER BY` so every aggregation needs a derived-table wrapper just to get rows in a stable order.
+[Firebird 4.0](https://firebirdsql.org/en/firebird-4-0/) has no native JSON functions. `JSON_OBJECT`, `JSON_ARRAYAGG`, and `JSON_QUERY` are still in [proposal stage](https://github.com/FirebirdSQL/firebird/issues) for future releases (likely 6.0+). Building JSON in Firebird 4.0 would mean fully manual string concatenation with explicit quote escaping for every key and value, plus carefully tracking opening and closing braces by hand. That path is doable but verbose and error-prone, and `LIST()` does not support `ORDER BY` so every aggregation needs a derived-table wrapper just to get rows in a stable order.
 
-Markdown construction needs the same aggregation tricks but skips the structural punctuation and escaping rules, which makes the script considerably less fragile. The output is still single-column text and still LLM-friendly. The trade-off is that Firebird dumps are not programmatically parseable the way the JSON dumps are, so any tooling that consumes sql-x-ray output needs to handle the format difference for this one engine.
+Markdown construction needs the same aggregation tricks but skips the structural punctuation and escaping rules, which makes the script considerably less fragile. The output is still single-column text and still LLM-friendly. The trade-off is that Firebird dumps are not programmatically parseable the way the JSON dumps are, so any tooling that consumes `sql-x-ray` output needs to handle the format difference for this one engine.
 
 If you specifically need JSON from Firebird, the natural path is to wait for native JSON support in a future release rather than build a fragile string-concatenation version now.
 
 ### MySQL and MariaDB on hosted sandboxes
 
-A note on the MySQL and MariaDB scripts: a small number of hosted SQL sandbox environments (including [sqlize.online](https://sqlize.online)) ship an `information_schema` with mixed `utf8mb3` collations and a query optimizer that drops explicit collation conversions during CTE materialization. On those environments some cross-CTE joins (most visibly `routines` and `trigger_count`) can come back empty even though the script handles the collation mismatch correctly. Standard MySQL 8+/9+ and MariaDB 10.5+ installations use `utf8mb4` throughout `information_schema` and are not affected.
+A note on the MySQL and MariaDB scripts: a small number of hosted SQL sandbox environments (including [sqlize.online](https://sqlize.online)) ship an [`information_schema`](https://dev.mysql.com/doc/refman/8.0/en/information-schema.html) with mixed `utf8mb3` collations and a query optimizer that drops explicit collation conversions during CTE materialization. On those environments some cross-CTE joins (most visibly `routines` and `trigger_count`) can come back empty even though the script handles the collation mismatch correctly. Standard [MySQL 8+/9+](https://dev.mysql.com/doc/refman/8.0/en/charset-unicode-utf8mb4.html) and [MariaDB 10.5+](https://mariadb.com/kb/en/character-sets/) installations use `utf8mb4` throughout `information_schema` and are not affected.
 
-***
+### Large schemas
+
+The scripts run cleanly on schemas with hundreds of tables. Validated runs include a 251-table [Oracle](https://www.oracle.com/database/) schema producing a 263 KB dump in a single query. The natural ceiling on output size is the LLM context window, not the database engine.
+
+If you have a much larger schema (thousands of tables) or you want to keep the dump small enough to fit comfortably in an LLM session, every dump includes an `object_counts` field in its metadata so you can see the size at a glance. From there you have a few options for trimming:
+
+| Option | Effect |
+|---|---|
+| Comment out the `INDEXES` and `TRIGGER COUNTS` sections | Removes the largest per-table payloads while keeping columns, PKs, and FKs intact |
+| Set `@include_stats = FALSE` ([MySQL](https://dev.mysql.com/doc/refman/8.0/en/), [MariaDB](https://mariadb.org/)) or skip the stats CTE elsewhere | Drops row count and size estimates |
+| Filter by schema ([PostgreSQL](https://www.postgresql.org/) `@schema_filter`, [MySQL](https://www.mysql.com/) `@schema_filter`) | Dump one logical area at a time |
+| Run the script, then ask the LLM to summarize | Push the trimming logic to the consumer where it has more context |
+
+These are deliberate manual choices rather than automatic degradation: the script always reports the full structure of whatever you point it at, and the trimming decision belongs to the person who knows what they're going to do with the result.
+
+The MySQL and MariaDB scripts also set [`group_concat_max_len = 4294967295`](https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_group_concat_max_len) (the maximum) at session start, which removes the only realistic aggregation overflow risk in the family. PostgreSQL [`jsonb_agg`](https://www.postgresql.org/docs/current/functions-aggregate.html), SQL Server [`STRING_AGG`](https://learn.microsoft.com/en-us/sql/t-sql/functions/string-agg-transact-sql) over `NVARCHAR(MAX)`, Oracle [`JSON_ARRAYAGG`](https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/JSON_ARRAYAGG.html) over `CLOB`, and SQLite [`json_group_array`](https://www.sqlite.org/json1.html#jgrouparray) have no comparable limits to worry about.
+
+---
 
 ## Script conventions
 
@@ -314,7 +332,7 @@ Every script has the same top-level shape:
    - `What's captured:` — output sections with brief descriptions
    - `What's deliberately excluded for privacy:` — bulleted list
    - `<Engine>-specific notes:` — quirks specific to this engine
-2. **A single `WITH ... SELECT` query** comprising the body (Firebird uses the same shape, but its terminal `SELECT` assembles Markdown rather than JSON).
+2. **A single [`WITH ... SELECT`](https://en.wikipedia.org/wiki/Hierarchical_and_recursive_queries_in_SQL#Common_table_expression) query** comprising the body (Firebird uses the same shape, but its terminal `SELECT` assembles Markdown rather than JSON).
 3. **Section markers between CTEs.** Each logical group of CTEs is preceded by a three-line comment block:
    ```sql
    -- ====================================================================
@@ -341,20 +359,20 @@ Most scripts share the same ordered set of sections, omitting any that don't app
 | `ROUTINES` | functions and stored procedures (signatures only) |
 | `SEQUENCES` | sequence objects (name only) |
 | `PACKAGES` | package objects (name only, where supported) |
-| `METADATA` | the dump's metadata header (tool name, engine, timestamp) |
+| `METADATA` | the dump's metadata header (tool name, engine, timestamp, schema list, object counts) |
 | `FINAL ASSEMBLY` | the outermost `SELECT` that emits `schema_dump` |
 
-Engine-specific sections keep their own descriptive names. PostgreSQL has `INHERITANCE / PARTITION PARENTS` and `USER-DEFINED TYPES`. MySQL, MariaDB, and SQL Server have `PARTITIONED TABLES` as a separate flag. Firebird has `TYPE RENDERING` and `USER RELATIONS` (Firebird-specific lookup CTEs) plus several Markdown assembly sections in place of the JSON `TABLES` / `VIEWS` blocks.
+Engine-specific sections keep their own descriptive names. [PostgreSQL](https://www.postgresql.org/) has `INHERITANCE / PARTITION PARENTS` and `USER-DEFINED TYPES`. [MySQL](https://www.mysql.com/), [MariaDB](https://mariadb.org/), and [SQL Server](https://www.microsoft.com/en-us/sql-server) have `PARTITIONED TABLES` as a separate flag. [Firebird](https://firebirdsql.org/) has `TYPE RENDERING` and `USER RELATIONS` (Firebird-specific lookup CTEs) plus several Markdown assembly sections in place of the JSON `TABLES` / `VIEWS` blocks.
 
 ### Code style
 
 | Aspect | Convention |
 |---|---|
 | SQL keywords | UPPERCASE (`SELECT`, `FROM`, `JOIN`, `GROUP BY`) |
-| Identifiers | lowercase, except where the catalog itself dictates otherwise (`RDB$RELATIONS` in Firebird, `USER_TAB_COLS` in Oracle, `INFORMATION_SCHEMA.TABLES` in standard SQL) |
+| Identifiers | lowercase, except where the catalog itself dictates otherwise (`RDB$RELATIONS` in [Firebird](https://firebirdsql.org/file/documentation/html/en/refdocs/fblangref40/firebird-40-language-reference.html), `USER_TAB_COLS` in [Oracle](https://docs.oracle.com/en/database/oracle/oracle-database/19/refrn/USER_TAB_COLS.html), [`INFORMATION_SCHEMA.TABLES`](https://en.wikipedia.org/wiki/Information_schema) in standard SQL) |
 | Indentation | 4 spaces, no tabs |
 | Commas | trailing |
-| Line endings | LF |
+| Line endings | [LF](https://en.wikipedia.org/wiki/Newline) |
 | Trailing whitespace | none |
 | Line length | soft target around 80 columns |
 
@@ -365,19 +383,19 @@ Engine-specific sections keep their own descriptive names. PostgreSQL has `INHER
 - Parenthetical clarifications are lowercase and added only when they convey non-obvious information. Example: `INDEXES (excludes PK-backing and unique-backing indexes)` is non-obvious; `COLUMNS (column metadata)` would just restate the title and is omitted.
 - Inline comments inside CTEs are mixed-case prose. They explain *why* (engine quirks, catalog gotchas, version constraints), not *what* (the SQL itself should be readable on its own).
 
-***
+---
 
 ## Requirements
 
-- A SQL client that can run a multi-CTE query and return a single text cell (JSON for most engines, Markdown for Firebird)
-- Read permission on the database's system catalogs and `information_schema`
-- No installs, no extensions, no Python required
+- A SQL client that can run a multi-CTE query and return a single text cell (JSON for most engines, Markdown for [Firebird](https://firebirdsql.org/))
+- Read permission on the database's [system catalogs](https://en.wikipedia.org/wiki/Database_catalog) and [`information_schema`](https://en.wikipedia.org/wiki/Information_schema)
+- No installs, no extensions, no [Python](https://www.python.org/) required
 
-***
+---
 
 ## Security and privacy
 
-- **Read-only.** Every script queries system catalogs and `information_schema` only. It never modifies the database, never queries row data, and never samples values from user columns.
+- **Read-only.** Every script queries system catalogs and [`information_schema`](https://en.wikipedia.org/wiki/Information_schema) only. It never modifies the database, never queries row data, and never samples values from user columns.
 - **Structure only, never values.** No field in the output can carry sensitive data by design. The guarantee comes from what the script doesn't read, not from filtering applied afterward.
 - **No network calls.** Everything runs in your SQL client against your database. Nothing leaves your environment until you choose to share the output.
 
@@ -386,27 +404,27 @@ Engine-specific sections keep their own descriptive names. PostgreSQL has `INHER
 The privacy stance is strong but not infinite. The following can appear in a dump and may matter in some contexts:
 
 - **Names of schemas, tables, columns, indexes, and constraints.** Almost always describe types of data rather than data itself, but proprietary product names or classified project codenames could be considered sensitive. Review before sharing externally if this applies to you.
-- **Estimated row counts.** Aggregate counts are universally safe under HIPAA, GDPR, and similar regimes, but in very small populations a count could narrow identification. Set `include_stats = FALSE` if needed.
+- **Estimated row counts.** Aggregate counts are universally safe under [HIPAA](https://www.hhs.gov/hipaa/index.html), [GDPR](https://gdpr.eu/), and similar regimes, but in very small populations a count could narrow identification. Set `include_stats = FALSE` if needed.
 - **Foreign key target names.** Reveal which tables relate to which.
 
-***
+---
 
 ## Using the dump with an LLM
 
 The output is designed to be safe for external LLMs. That guarantee covers what the tool produces. It does not cover the service you send it to.
 
-Strong recommendation: use only an LLM your employer has explicitly vetted, or one with a contractual relationship (enterprise API agreement, signed BAA, private deployment, or documented institutional policy that permits the use). Even structural metadata describes systems that may contain protected data, and many organizations have policies on disclosing system descriptions to external services.
+Strong recommendation: use only an LLM your employer has explicitly vetted, or one with a contractual relationship (enterprise [API](https://www.anthropic.com/api) agreement, signed [BAA](https://www.hhs.gov/hipaa/for-professionals/covered-entities/sample-business-associate-agreement-provisions/index.html), private deployment, or documented institutional policy that permits the use). Even structural metadata describes systems that may contain protected data, and many organizations have policies on disclosing system descriptions to external services.
 
 Before pasting a dump into any LLM:
 
 - Check your organization's data governance, IT, or security policy
-- Confirm the LLM provider's data handling terms (training opt-out, retention, geographic location, subprocessor list)
+- Confirm the LLM provider's data handling terms (training opt-out, retention, geographic location, [subprocessor](https://gdpr.eu/article-28-processor/) list)
 - Prefer enterprise or API tiers with zero-retention guarantees over free consumer chat tiers
-- When in doubt, ask your DPO, CISO, IT, or compliance contact
+- When in doubt, ask your [DPO](https://gdpr.eu/data-protection-officer/), CISO, IT, or compliance contact
 
 The author and contributors of `sql-x-ray` accept no liability for misuse, data exposure, regulatory consequences, or contractual breaches that result from sharing dump output with third-party services. The tool's privacy properties are a starting point, not a substitute for institutional review.
 
-***
+---
 
 ## License
 

@@ -580,6 +580,13 @@ FROM (
             'schema_filter',    (SELECT schema_filter FROM params),
             'schemas',          (SELECT jsonb_agg(schema_name ORDER BY schema_name)
                                  FROM target_schemas),
+            'object_counts',    jsonb_build_object(
+                'tables',    COALESCE(jsonb_array_length((SELECT payload FROM tables_json)),    0),
+                'views',     COALESCE(jsonb_array_length((SELECT payload FROM views_json)),     0),
+                'routines',  COALESCE(jsonb_array_length((SELECT payload FROM routines_json)),  0),
+                'sequences', COALESCE(jsonb_array_length((SELECT payload FROM sequences_json)), 0),
+                'types',     COALESCE(jsonb_array_length((SELECT payload FROM types_json)),     0)
+            ),
             'privacy_note',
                 'This document contains only structural metadata. '
              || 'It deliberately excludes: default value literals, '

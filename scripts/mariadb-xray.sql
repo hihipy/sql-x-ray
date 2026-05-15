@@ -509,6 +509,11 @@ meta AS (
               AND s.SCHEMA_NAME NOT IN ('mysql', 'information_schema',
                                          'performance_schema', 'sys')
         ),
+        'object_counts',  JSON_OBJECT(
+            'tables',    COALESCE(JSON_LENGTH((SELECT payload FROM tables_json)),    0),
+            'views',     COALESCE(JSON_LENGTH((SELECT payload FROM views_json)),     0),
+            'routines',  COALESCE(JSON_LENGTH((SELECT payload FROM routines_json)),  0)
+        ),
         'privacy_note',
             CONCAT(
                 'This document contains only structural metadata. ',
