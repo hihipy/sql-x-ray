@@ -25,9 +25,8 @@
 --   so an LLM knows the construct is there without seeing what's in it.
 --
 -- COMPATIBILITY
---   PostgreSQL 9.6 or newer. No extensions required.
---   Tested on: vanilla Postgres, AWS RDS, Aurora, Supabase, Neon,
---   Crunchy, Heroku, Azure Database for PostgreSQL.
+--   PostgreSQL 12 or newer. No extensions required.
+--   Tested on PostgreSQL 17 (with PostGIS) and PostgreSQL 18.
 --
 -- USAGE
 --   Edit the `params` CTE below to target a schema, then run.
@@ -67,7 +66,22 @@ WITH params AS (
 ),
 
 -- ---------------------------------------------------------------------
+-- Extension-owned relations: tables, views, and sequences created by
+-- installed extensions (PostGIS spatial_ref_sys/geometry_columns,
+-- Supabase auth.users, pg_stat_statements, etc.). Excluded so the dump
+-- shows only the user's actual schema, not the plumbing.
+-- ---------------------------------------------------------------------
+extension_owned AS (
+    SELECT d.objid AS oid
+    FROM pg_depend d
+    WHERE d.deptype = 'e'
+      AND d.classid = 'pg_class'::regclass
+),
+
+-- ---------------------------------------------------------------------
 -- Resolve target schemas, optionally dropping empty public schemas.
+-- The "empty" check ignores extension-owned objects, so a schema that
+-- only holds PostGIS or Supabase plumbing still counts as empty.
 -- ---------------------------------------------------------------------
 candidate_schemas AS (
     SELECT n.oid AS schema_oid, n.nspname AS schema_name
@@ -87,6 +101,9 @@ target_schemas AS (
             SELECT 1 FROM pg_class c
             WHERE c.relnamespace = cs.schema_oid
               AND c.relkind IN ('r', 'p', 'f', 'v', 'm', 'S')
+              AND NOT EXISTS (
+                  SELECT 1 FROM extension_owned eo WHERE eo.oid = c.oid
+              )
         )
     )
 ),
@@ -117,6 +134,7 @@ cols AS (
     WHERE c.relkind IN ('r', 'p', 'f')
       AND a.attnum > 0
       AND NOT a.attisdropped
+      AND NOT EXISTS (SELECT 1 FROM extension_owned eo WHERE eo.oid = c.oid)
     GROUP BY ts.schema_name, c.relname
 ),
 
@@ -139,6 +157,7 @@ pks AS (
     JOIN pg_class c ON c.oid = con.conrelid
     JOIN target_schemas ts ON ts.schema_oid = c.relnamespace
     WHERE con.contype = 'p'
+      AND NOT EXISTS (SELECT 1 FROM extension_owned eo WHERE eo.oid = c.oid)
 ),
 
 -- =====================================================================
@@ -187,6 +206,7 @@ fks AS (
     JOIN pg_class rc ON rc.oid = con.confrelid
     JOIN pg_namespace rn ON rn.oid = rc.relnamespace
     WHERE con.contype = 'f'
+      AND NOT EXISTS (SELECT 1 FROM extension_owned eo WHERE eo.oid = c.oid)
     GROUP BY ts.schema_name, c.relname
 ),
 
@@ -212,6 +232,7 @@ uqs AS (
     JOIN pg_class c ON c.oid = con.conrelid
     JOIN target_schemas ts ON ts.schema_oid = c.relnamespace
     WHERE con.contype = 'u'
+      AND NOT EXISTS (SELECT 1 FROM extension_owned eo WHERE eo.oid = c.oid)
     GROUP BY ts.schema_name, c.relname
 ),
 
@@ -227,6 +248,7 @@ checks AS (
     JOIN pg_class c ON c.oid = con.conrelid
     JOIN target_schemas ts ON ts.schema_oid = c.relnamespace
     WHERE con.contype = 'c'
+      AND NOT EXISTS (SELECT 1 FROM extension_owned eo WHERE eo.oid = c.oid)
     GROUP BY ts.schema_name, c.relname
 ),
 
@@ -281,6 +303,7 @@ idx AS (
           SELECT 1 FROM pg_constraint con
           WHERE con.conindid = ix.indexrelid AND con.contype = 'u'
       )
+      AND NOT EXISTS (SELECT 1 FROM extension_owned eo WHERE eo.oid = c.oid)
     GROUP BY ts.schema_name, c.relname
 ),
 
@@ -296,6 +319,7 @@ trgs AS (
     JOIN pg_class c ON c.oid = t.tgrelid
     JOIN target_schemas ts ON ts.schema_oid = c.relnamespace
     WHERE NOT t.tgisinternal
+      AND NOT EXISTS (SELECT 1 FROM extension_owned eo WHERE eo.oid = c.oid)
     GROUP BY ts.schema_name, c.relname
 ),
 
@@ -318,6 +342,7 @@ inh AS (
     JOIN pg_class parent ON parent.oid = h.inhparent
     JOIN pg_namespace pn ON pn.oid     = parent.relnamespace
     JOIN target_schemas ts ON ts.schema_oid = child.relnamespace
+    WHERE NOT EXISTS (SELECT 1 FROM extension_owned eo WHERE eo.oid = child.oid)
     GROUP BY ts.schema_name, child.relname
 ),
 
@@ -337,6 +362,7 @@ tbl_meta AS (
     FROM pg_class c
     JOIN target_schemas ts ON ts.schema_oid = c.relnamespace
     WHERE c.relkind IN ('r', 'p', 'f')
+      AND NOT EXISTS (SELECT 1 FROM extension_owned eo WHERE eo.oid = c.oid)
 ),
 
 stats AS (
@@ -348,6 +374,7 @@ stats AS (
     FROM pg_stat_user_tables s
     JOIN target_schemas ts ON ts.schema_name = s.schemaname
     WHERE (SELECT include_stats FROM params)
+      AND NOT EXISTS (SELECT 1 FROM extension_owned eo WHERE eo.oid = s.relid)
 ),
 
 -- =====================================================================
@@ -407,6 +434,7 @@ view_cols AS (
     WHERE c.relkind IN ('v', 'm')
       AND a.attnum > 0
       AND NOT a.attisdropped
+      AND NOT EXISTS (SELECT 1 FROM extension_owned eo WHERE eo.oid = c.oid)
     GROUP BY ts.schema_name, c.relname
 ),
 
@@ -428,6 +456,7 @@ views_json AS (
     LEFT JOIN view_cols vc
       ON vc.schema_name = ts.schema_name AND vc.view_name = c.relname
     WHERE c.relkind IN ('v', 'm')
+      AND NOT EXISTS (SELECT 1 FROM extension_owned eo WHERE eo.oid = c.oid)
 ),
 
 -- =====================================================================
@@ -531,7 +560,7 @@ FROM (
             'tool_name',        'sql-x-ray',
             'tool_version',     '1.0.0',
             'engine',           'postgresql',
-            'engine_version',   current_setting('server_version'),
+            'engine_version',   split_part(current_setting('server_version'), ' ', 1),
             'database',         current_database(),
             'generated_at',     to_char(now() AT TIME ZONE 'UTC',
                                        'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
