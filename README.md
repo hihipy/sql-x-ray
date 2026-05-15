@@ -26,13 +26,13 @@ Sample databases available on sqlize.online:
 
 | Engine | Sample schema |
 |---|---|
-| [PostgreSQL 18 Bookings](https://postgrespro.com/community/demodb) (ReadOnly) | Airline reservations: flights, bookings, tickets, boarding passes, seats |
-| [PostgreSQL 17 + PostGIS WorkShop](https://postgis.net/workshops/postgis-intro/) (ReadOnly) | Spatial and geographic data |
-| [MySQL 9.7 Sakila](https://dev.mysql.com/doc/sakila/en/) (ReadOnly) | DVD rental store (the canonical sample) |
+| [Firebird 4.0 Employee](https://firebirdsql.org/manual/qsg2-installing.html) | Firebird's bundled sample |
 | [MariaDB 11.8 OpenFlights](https://openflights.org/data.html) (ReadOnly) | Airport, airline, and route data |
 | [MS SQL Server 2022 AdventureWorks](https://learn.microsoft.com/en-us/sql/samples/adventureworks-install-configure) (ReadOnly) | Microsoft's bicycle company (68 tables, 5 schemas) |
+| [MySQL 9.7 Sakila](https://dev.mysql.com/doc/sakila/en/) (ReadOnly) | DVD rental store (the canonical sample) |
 | [Oracle Database 19c HR](https://docs.oracle.com/en/database/oracle/oracle-database/19/comsc/installing-sample-schemas.html) | Classic Oracle HR sample (employees, departments, jobs) |
-| [Firebird 4.0 Employee](https://firebirdsql.org/manual/qsg2-installing.html) | Firebird's bundled sample |
+| [PostgreSQL 17 + PostGIS WorkShop](https://postgis.net/workshops/postgis-intro/) (ReadOnly) | Spatial and geographic data |
+| [PostgreSQL 18 Bookings](https://postgrespro.com/community/demodb) (ReadOnly) | Airline reservations: flights, bookings, tickets, boarding passes, seats |
 | SQLite 3 Preloaded | Custom lab and survey database with [Palmer Penguins](https://allisonhorst.github.io/palmerpenguins/) data (13 tables across staff, experiments, equipment, and penguins) |
 
 This is also the right way to validate a script after editing it. Test against a known schema before pointing it at your real database.
@@ -122,7 +122,7 @@ An LLM can use this to write a correct join between `orders` and `customers` (ri
 
 1. Open the script for your engine in the `scripts/` folder
 2. Adjust the `params` block at the top of the file (schema filter, whether to include row counts, whether to pretty-print)
-3. Run the script in any SQL client ([DBeaver](https://dbeaver.io/), [DataGrip](https://www.jetbrains.com/datagrip/), [psql](https://www.postgresql.org/docs/current/app-psql.html), [pgAdmin](https://www.pgadmin.org/), [Metabase](https://www.metabase.com/), [Insight](https://insight.openclinica.com/), [SSMS](https://learn.microsoft.com/en-us/sql/ssms/), [Snowsight](https://docs.snowflake.com/en/user-guide/ui-snowsight))
+3. Run the script in any SQL client ([DBeaver](https://dbeaver.io/), [DataGrip](https://www.jetbrains.com/datagrip/), [psql](https://www.postgresql.org/docs/current/app-psql.html), [pgAdmin](https://www.pgadmin.org/), [Metabase](https://www.metabase.com/), [Insight](https://insight.openclinica.com/), [SSMS](https://learn.microsoft.com/en-us/sql/ssms/))
 4. The result is a single cell containing a JSON document. Copy and save it as `schema.json`.
 
 To feed the dump to an LLM, paste it into a chat with a short intro:
@@ -271,15 +271,14 @@ Existence is still recorded where useful. `check_constraint_count: 3` tells the 
 
 | Engine | Script | Status | Minimum version |
 |---|---|---|---|
-| [PostgreSQL](https://dbdb.io/db/postgresql) | `scripts/postgres-xray.sql` | Stable | [PostgreSQL 12](https://www.postgresql.org/docs/12/release-12.html) |
-| [MySQL](https://dbdb.io/db/mysql) | `scripts/mysql-xray.sql` | Stable | [MySQL 8.0.16](https://dev.mysql.com/doc/relnotes/mysql/8.0/en/news-8-0-16.html) |
-| [MariaDB](https://dbdb.io/db/mariadb) | `scripts/mariadb-xray.sql` | Stable | [MariaDB 10.5](https://mariadb.com/kb/en/changes-improvements-in-mariadb-105/) |
-| [SQL Server](https://dbdb.io/db/sql-server) | `scripts/sqlserver-xray.sql` | Stable | [SQL Server 2022](https://learn.microsoft.com/en-us/sql/sql-server/what-s-new-in-sql-server-2022) |
-| [Firebird](https://dbdb.io/db/firebird) | `scripts/firebird-xray.sql` | Stable (Markdown output) | [Firebird 4.0](https://firebirdsql.org/en/firebird-4-0/) |
-| [Oracle](https://dbdb.io/db/oracle) | `scripts/oracle-xray.sql` | Stable | [Oracle 18c](https://docs.oracle.com/en/database/oracle/oracle-database/18/) |
-| [SQLite](https://dbdb.io/db/sqlite) | `scripts/sqlite-xray.sql` | Stable | [SQLite 3.44](https://www.sqlite.org/releaselog/3_44_0.html) |
 | [BigQuery](https://dbdb.io/db/bigquery) | `scripts/bigquery-xray.sql` | Stable | [GoogleSQL](https://cloud.google.com/bigquery/docs/introduction-sql) |
-| [Snowflake](https://dbdb.io/db/snowflake) | `scripts/snowflake-xray.sql` | Planned | |
+| [Firebird](https://dbdb.io/db/firebird) | `scripts/firebird-xray.sql` | Stable (Markdown output) | [Firebird 4.0](https://firebirdsql.org/en/firebird-4-0/) |
+| [MariaDB](https://dbdb.io/db/mariadb) | `scripts/mariadb-xray.sql` | Stable | [MariaDB 10.5](https://mariadb.com/kb/en/changes-improvements-in-mariadb-105/) |
+| [MySQL](https://dbdb.io/db/mysql) | `scripts/mysql-xray.sql` | Stable | [MySQL 8.0.16](https://dev.mysql.com/doc/relnotes/mysql/8.0/en/news-8-0-16.html) |
+| [Oracle](https://dbdb.io/db/oracle) | `scripts/oracle-xray.sql` | Stable | [Oracle 18c](https://docs.oracle.com/en/database/oracle/oracle-database/18/) |
+| [PostgreSQL](https://dbdb.io/db/postgresql) | `scripts/postgres-xray.sql` | Stable | [PostgreSQL 12](https://www.postgresql.org/docs/12/release-12.html) |
+| [SQL Server](https://dbdb.io/db/sql-server) | `scripts/sqlserver-xray.sql` | Stable | [SQL Server 2022](https://learn.microsoft.com/en-us/sql/sql-server/what-s-new-in-sql-server-2022) |
+| [SQLite](https://dbdb.io/db/sqlite) | `scripts/sqlite-xray.sql` | Stable | [SQLite 3.44](https://www.sqlite.org/releaselog/3_44_0.html) |
 
 Engine names link to their entry in [Database of Databases](https://dbdb.io), the database encyclopedia maintained by Carnegie Mellon University.
 
