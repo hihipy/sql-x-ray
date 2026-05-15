@@ -178,13 +178,13 @@ Existence is still recorded where useful. `check_constraint_count: 3` tells the 
 |---|---|---|---|
 | PostgreSQL | `scripts/postgres-xray.sql` | Stable | PostgreSQL 12 |
 | MySQL | `scripts/mysql-xray.sql` | Stable | MySQL 8.0.16 |
+| MariaDB | `scripts/mariadb-xray.sql` | Stable | MariaDB 10.5 |
 | SQLite | `scripts/sqlite-xray.sql` | Planned | SQLite 3.38 |
-| MariaDB | `scripts/mariadb-xray.sql` | Planned | |
 | SQL Server | `scripts/sqlserver-xray.sql` | Planned | |
 | Snowflake | `scripts/snowflake-xray.sql` | Planned | |
 | BigQuery | `scripts/bigquery-xray.sql` | Planned | |
 
-A note on the MySQL script: a small number of hosted SQL sandbox environments (including sqlize.online) ship a `information_schema` with mixed `utf8mb3` collations and a query optimizer that drops explicit collation conversions during CTE materialization. On those environments the `routines` array and `trigger_count` fields will come back empty even though the script handles the collation mismatch correctly. Standard MySQL 8+ and 9+ installations use `utf8mb4` throughout `information_schema` and are not affected. MariaDB diverges enough from MySQL in its catalog views that a separate script is warranted.
+A note on the MySQL and MariaDB scripts: a small number of hosted SQL sandbox environments (including sqlize.online) ship an `information_schema` with mixed `utf8mb3` collations and a query optimizer that drops explicit collation conversions during CTE materialization. On those environments some cross-CTE joins (most visibly `routines` and `trigger_count`) can come back empty even though the script handles the collation mismatch correctly. Standard MySQL 8+/9+ and MariaDB 10.5+ installations use `utf8mb4` throughout `information_schema` and are not affected.
 
 ---
 
