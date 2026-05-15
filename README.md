@@ -157,6 +157,99 @@ For sequences and user-defined types: existence and basic metadata only. Enum va
 
 ---
 
+## What you can build from the dump
+
+The dump is structural metadata in a predictable JSON shape. Once you have it, plenty of useful artifacts fall out almost for free, mostly by handing the JSON to an LLM with a short instruction.
+
+### Visual diagrams
+
+**Mermaid ER diagrams** for documentation, READMEs, or wikis. GitHub, GitLab, Notion, Obsidian, and most static-site generators render Mermaid natively. Prompt:
+
+> Convert this schema dump into a Mermaid `erDiagram`. Show primary keys with `PK`, foreign keys with `FK`, and connect tables using FK relationships with proper cardinality.
+
+A small e-commerce schema renders as:
+
+```mermaid
+erDiagram
+    customers ||--o{ orders : places
+    orders ||--|{ order_items : contains
+    products ||--o{ order_items : appears_in
+    customers {
+        bigint id PK
+        text email
+        text full_name
+        timestamp created_at
+    }
+    orders {
+        bigint id PK
+        bigint customer_id FK
+        numeric total_cents
+        timestamp placed_at
+    }
+    order_items {
+        bigint id PK
+        bigint order_id FK
+        bigint product_id FK
+        integer quantity
+    }
+    products {
+        bigint id PK
+        text sku
+        text name
+        numeric price_cents
+    }
+```
+
+**DBML for dbdiagram.io** if you want a more polished, browsable diagram. Same approach, different output syntax.
+
+**PlantUML, Graphviz/DOT, D2** all work too — any text-based diagram language an LLM knows.
+
+### Code generation
+
+| Target | What to ask for |
+|---|---|
+| Python ORMs | SQLAlchemy 2.0 `Mapped[]` models, Django models, Tortoise ORM, peewee |
+| TypeScript / JS | Prisma schemas, TypeORM entities, Drizzle ORM schemas, Zod validators |
+| Go | GORM structs, sqlc queries with `CREATE TABLE` references |
+| Type definitions | Pydantic v2 models, TypeScript interfaces, JSON Schema, protobuf, GraphQL SDL |
+| API specs | OpenAPI/Swagger, GraphQL schemas with resolvers stubbed |
+| Migration tools | Alembic, Flyway, Liquibase, dbmate skeletons |
+
+Generic prompt: "Generate SQLAlchemy 2.0 declarative models from this schema dump. Use `Mapped[]` annotations, match column types properly, and add `relationship()` calls based on the foreign keys."
+
+### Documentation
+
+- **Data dictionary** in Markdown, one table per section, columns with types and FK references
+- **Onboarding doc** describing what each table is for, inferred from column names and relationships
+- **High-level domain map** grouping tables into clusters (auth, billing, content, audit, etc.)
+
+### Schema analysis
+
+- **Orphan tables** with no foreign keys in or out, often dead tables or audit logs worth flagging
+- **Hub tables** with many incoming foreign keys, central entities like `users` or `orders` worth understanding first
+- **Naming convention audits** for column suffixes (`_id`, `_at`, `_count`), casing (snake vs camel), plural vs singular table names
+- **Schema diff** by running the script before and after a migration and comparing the two JSON outputs
+- **Missing PK audit** showing tables with no primary key declared
+- **FK without index** showing relationships likely to cause slow joins (where the engine reports indexes)
+
+A diff prompt: "Here are two schema dumps of the same database taken a month apart. Summarize what changed: new tables, dropped columns, type changes, added or removed foreign keys."
+
+### Query writing (the original use case)
+
+Paste the dump into your LLM chat once at the start of a session, then ask:
+
+> Give me a query that returns customers who placed an order in the last 30 days but never returned anything.
+
+The LLM has the tables, the columns, the types, and the relationships in one place. Joins come out right on the first try, and the LLM never invents columns that don't exist.
+
+### Test data and migration helpers
+
+- **Seed scripts** that populate tables in dependency order based on the FK graph
+- **Test fixture generators** that produce plausible synthetic rows for each table
+- **Migration script scaffolding** ("here's how to add a column" prompts work well with the full schema as context)
+
+---
+
 ## What's never in the dump
 
 | Excluded | Why |
@@ -184,8 +277,8 @@ Existence is still recorded where useful. `check_constraint_count: 3` tells the 
 | [Firebird](https://dbdb.io/db/firebird) | `scripts/firebird-xray.sql` | Stable (Markdown output) | Firebird 4.0 |
 | [Oracle](https://dbdb.io/db/oracle) | `scripts/oracle-xray.sql` | Stable | Oracle 18c |
 | [SQLite](https://dbdb.io/db/sqlite) | `scripts/sqlite-xray.sql` | Stable | SQLite 3.44 |
+| [BigQuery](https://dbdb.io/db/bigquery) | `scripts/bigquery-xray.sql` | Draft (pending validation) | GoogleSQL |
 | [Snowflake](https://dbdb.io/db/snowflake) | `scripts/snowflake-xray.sql` | Planned | |
-| [BigQuery](https://dbdb.io/db/bigquery) | `scripts/bigquery-xray.sql` | Planned | |
 
 Engine names link to their entry in [Database of Databases](https://dbdb.io), the database encyclopedia maintained by Carnegie Mellon University.
 
