@@ -179,8 +179,7 @@ Existence is still recorded where useful. `check_constraint_count: 3` tells the 
 | PostgreSQL | `scripts/postgres-xray.sql` | Stable | PostgreSQL 12 |
 | MySQL | `scripts/mysql-xray.sql` | Stable | MySQL 8.0.16 |
 | MariaDB | `scripts/mariadb-xray.sql` | Stable | MariaDB 10.5 |
-| SQLite | `scripts/sqlite-xray.sql` | Planned | SQLite 3.38 |
-| SQL Server | `scripts/sqlserver-xray.sql` | Planned | |
+| SQL Server | `scripts/sqlserver-xray.sql` | Stable | SQL Server 2022 |
 | Snowflake | `scripts/snowflake-xray.sql` | Planned | |
 | BigQuery | `scripts/bigquery-xray.sql` | Planned | |
 
