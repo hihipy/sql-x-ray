@@ -8,7 +8,7 @@
 
 ## Why this exists
 
-Copying a full schema into an LLM chat fails on size for any non-trivial database, and even when it fits, view bodies and [`CHECK`](https://en.wikipedia.org/wiki/Check_constraint) expressions can leak business logic or literal values. Sample queries are slow and error-prone. `sql-x-ray` gives the LLM exactly what it needs to write accurate queries against your schema (tables, columns, types, relationships, indexes) and nothing it shouldn't have.
+Copying a full schema into an LLM chat fails on size for any non-trivial database, and even when it fits, view bodies and `CHECK` expressions can leak business logic or literal values. Sample queries are slow and error-prone. `sql-x-ray` gives the LLM exactly what it needs to write accurate queries against your schema (tables, columns, types, relationships, indexes) and nothing it shouldn't have.
 
 ---
 
@@ -16,13 +16,13 @@ Copying a full schema into an LLM chat fails on size for any non-trivial databas
 
 The fastest way to see the output is to run it against a preloaded sample database at [sqlize.online](https://sqlize.online). No install, no signup, no setup.
 
-1. Open [sqlize.online](https://sqlize.online)
+1. Open sqlize.online
 2. Pick a ReadOnly sample database from the engine dropdown
 3. Paste the matching script from this repo (e.g. [`scripts/postgres-xray.sql`](https://github.com/hihipy/sql-x-ray/blob/main/scripts/postgres-xray.sql))
 4. Click **Run SQL code**
-5. The single result cell contains the full dump ([JSON](https://www.json.org/) for most engines, [Markdown](https://daringfireball.net/projects/markdown/) for Firebird). Copy it, paste into your LLM of choice, done.
+5. The single result cell contains the full dump (JSON for most engines, Markdown for Firebird). Copy it, paste into your LLM of choice, done.
 
-Sample databases available on [sqlize.online](https://sqlize.online):
+Sample databases available on sqlize.online:
 
 | Engine | Sample schema |
 |---|---|
@@ -40,7 +40,7 @@ This is also the right way to validate a script after editing it. Test against a
 Other SQL playgrounds worth knowing:
 
 - [DB Fiddle](https://www.db-fiddle.com): PostgreSQL, MySQL, SQLite, SQL Server. Clean two-pane interface.
-- [Aiven Postgres Playground](https://aiven.io/tools/pg-playground): PostgreSQL via [WebAssembly](https://webassembly.org/), entirely in your browser.
+- [Aiven Postgres Playground](https://aiven.io/tools/pg-playground): PostgreSQL via WebAssembly, entirely in your browser.
 - [playcode.io SQL Playground](https://playcode.io/sql-playground): PostgreSQL via [PGlite](https://pglite.dev/) with preloaded [Chinook](https://github.com/lerocha/chinook-database) (music store) and [Northwind](https://github.com/Microsoft/sql-server-samples/tree/master/samples/databases/northwind-pubs) (e-commerce).
 
 ---
@@ -160,11 +160,11 @@ For sequences and user-defined types: existence and basic metadata only. Enum va
 
 ## What you can build from the dump
 
-The dump is structural metadata in a predictable [JSON](https://www.json.org/) shape. Once you have it, plenty of useful artifacts fall out almost for free, mostly by handing the JSON to an LLM with a short instruction. Programmatic access works too: anything that reads JSON ([`jq`](https://jqlang.github.io/jq/), Python's [`json`](https://docs.python.org/3/library/json.html), JavaScript's `JSON.parse`) can walk the structure directly.
+The dump is structural metadata in a predictable JSON shape. Once you have it, plenty of useful artifacts fall out almost for free, mostly by handing the JSON to an LLM with a short instruction. Programmatic access works too: anything that reads JSON ([`jq`](https://jqlang.github.io/jq/), Python's [`json`](https://docs.python.org/3/library/json.html), JavaScript's `JSON.parse`) can walk the structure directly.
 
 ### Visual diagrams
 
-**[Mermaid](https://mermaid.js.org/) ER diagrams** for documentation, READMEs, or wikis. [GitHub](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams), [GitLab](https://docs.gitlab.com/ee/user/markdown.html#diagrams-and-flowcharts), [Notion](https://www.notion.so/help/guides/diagrams), [Obsidian](https://help.obsidian.md/Editing+and+formatting/Advanced+formatting+syntax#Diagram), and most static-site generators render Mermaid natively. Prompt:
+**[Mermaid](https://mermaid.js.org/) ER diagrams** for documentation, READMEs, or wikis. GitHub, GitLab, Notion, Obsidian, and most static-site generators render Mermaid natively. Prompt:
 
 > Convert this schema dump into a Mermaid `erDiagram`. Show primary keys with `PK`, foreign keys with `FK`, and connect tables using FK relationships with proper cardinality.
 
@@ -212,7 +212,7 @@ erDiagram
 | Python ORMs | [SQLAlchemy](https://www.sqlalchemy.org/) 2.0 `Mapped[]` models, [Django](https://docs.djangoproject.com/en/stable/topics/db/models/) models, [Tortoise ORM](https://tortoise.github.io/), [peewee](http://docs.peewee-orm.com/) |
 | TypeScript / JS | [Prisma](https://www.prisma.io/) schemas, [TypeORM](https://typeorm.io/) entities, [Drizzle ORM](https://orm.drizzle.team/) schemas, [Zod](https://zod.dev/) validators |
 | Go | [GORM](https://gorm.io/) structs, [sqlc](https://sqlc.dev/) queries with `CREATE TABLE` references |
-| Type definitions | [Pydantic](https://docs.pydantic.dev/) v2 models, [TypeScript](https://www.typescriptlang.org/) interfaces, [JSON Schema](https://json-schema.org/), [protobuf](https://protobuf.dev/), [GraphQL SDL](https://graphql.org/learn/schema/) |
+| Type definitions | [Pydantic](https://docs.pydantic.dev/) v2 models, TypeScript interfaces, [JSON Schema](https://json-schema.org/), [protobuf](https://protobuf.dev/), [GraphQL SDL](https://graphql.org/learn/schema/) |
 | API specs | [OpenAPI/Swagger](https://www.openapis.org/), [GraphQL](https://graphql.org/) schemas with resolvers stubbed |
 | Migration tools | [Alembic](https://alembic.sqlalchemy.org/), [Flyway](https://www.red-gate.com/products/flyway/), [Liquibase](https://www.liquibase.com/), [dbmate](https://github.com/amacneil/dbmate) skeletons |
 
@@ -228,7 +228,7 @@ Generic prompt: "Generate SQLAlchemy 2.0 declarative models from this schema dum
 
 - **Orphan tables** with no foreign keys in or out, often dead tables or audit logs worth flagging
 - **Hub tables** with many incoming foreign keys, central entities like `users` or `orders` worth understanding first
-- **Naming convention audits** for column suffixes (`_id`, `_at`, `_count`), casing ([snake](https://en.wikipedia.org/wiki/Snake_case) vs [camel](https://en.wikipedia.org/wiki/Camel_case)), plural vs singular table names
+- **Naming convention audits** for column suffixes (`_id`, `_at`, `_count`), casing (snake vs camel), plural vs singular table names
 - **Schema diff** by running the script before and after a migration and comparing the two JSON outputs
 - **Missing PK audit** showing tables with no primary key declared
 - **FK without index** showing relationships likely to cause slow joins (where the engine reports indexes)
@@ -281,11 +281,11 @@ Existence is still recorded where useful. `check_constraint_count: 3` tells the 
 | [BigQuery](https://dbdb.io/db/bigquery) | `scripts/bigquery-xray.sql` | Draft (pending validation) | [GoogleSQL](https://cloud.google.com/bigquery/docs/introduction-sql) |
 | [Snowflake](https://dbdb.io/db/snowflake) | `scripts/snowflake-xray.sql` | Planned | |
 
-Engine names link to their entry in [Database of Databases](https://dbdb.io), the database encyclopedia maintained by [Carnegie Mellon University](https://db.cs.cmu.edu/).
+Engine names link to their entry in [Database of Databases](https://dbdb.io), the database encyclopedia maintained by Carnegie Mellon University.
 
 ### Why Firebird outputs Markdown instead of JSON
 
-[Firebird 4.0](https://firebirdsql.org/en/firebird-4-0/) has no native JSON functions. `JSON_OBJECT`, `JSON_ARRAYAGG`, and `JSON_QUERY` are still in [proposal stage](https://github.com/FirebirdSQL/firebird/issues) for future releases (likely 6.0+). Building JSON in Firebird 4.0 would mean fully manual string concatenation with explicit quote escaping for every key and value, plus carefully tracking opening and closing braces by hand. That path is doable but verbose and error-prone, and `LIST()` does not support `ORDER BY` so every aggregation needs a derived-table wrapper just to get rows in a stable order.
+[Firebird 4.0](https://firebirdsql.org/en/firebird-4-0/) has no native JSON functions. `JSON_OBJECT`, `JSON_ARRAYAGG`, and `JSON_QUERY` are still in proposal stage for future releases (likely 6.0+). Building JSON in Firebird 4.0 would mean fully manual string concatenation with explicit quote escaping for every key and value, plus carefully tracking opening and closing braces by hand. That path is doable but verbose and error-prone, and `LIST()` does not support `ORDER BY` so every aggregation needs a derived-table wrapper just to get rows in a stable order.
 
 Markdown construction needs the same aggregation tricks but skips the structural punctuation and escaping rules, which makes the script considerably less fragile. The output is still single-column text and still LLM-friendly. The trade-off is that Firebird dumps are not programmatically parseable the way the JSON dumps are, so any tooling that consumes `sql-x-ray` output needs to handle the format difference for this one engine.
 
@@ -293,19 +293,19 @@ If you specifically need JSON from Firebird, the natural path is to wait for nat
 
 ### MySQL and MariaDB on hosted sandboxes
 
-A note on the MySQL and MariaDB scripts: a small number of hosted SQL sandbox environments (including [sqlize.online](https://sqlize.online)) ship an [`information_schema`](https://dev.mysql.com/doc/refman/8.0/en/information-schema.html) with mixed `utf8mb3` collations and a query optimizer that drops explicit collation conversions during CTE materialization. On those environments some cross-CTE joins (most visibly `routines` and `trigger_count`) can come back empty even though the script handles the collation mismatch correctly. Standard [MySQL 8+/9+](https://dev.mysql.com/doc/refman/8.0/en/charset-unicode-utf8mb4.html) and [MariaDB 10.5+](https://mariadb.com/kb/en/character-sets/) installations use `utf8mb4` throughout `information_schema` and are not affected.
+A note on the MySQL and MariaDB scripts: a small number of hosted SQL sandbox environments (including [sqlize.online](https://sqlize.online)) ship an [`information_schema`](https://dev.mysql.com/doc/refman/8.0/en/information-schema.html) with mixed `utf8mb3` collations and a query optimizer that drops explicit collation conversions during CTE materialization. On those environments some cross-CTE joins (most visibly `routines` and `trigger_count`) can come back empty even though the script handles the collation mismatch correctly. Standard [MySQL 8+/9+](https://dev.mysql.com/doc/refman/8.0/en/charset-unicode-utf8mb4.html) and MariaDB 10.5+ installations use `utf8mb4` throughout `information_schema` and are not affected.
 
 ### Large schemas
 
-The scripts run cleanly on schemas with hundreds of tables. Validated runs include a 251-table [Oracle](https://www.oracle.com/database/) schema producing a 263 KB dump in a single query. The natural ceiling on output size is the LLM context window, not the database engine.
+The scripts run cleanly on schemas with hundreds of tables. Validated runs include a 251-table Oracle schema producing a 263 KB dump in a single query. The natural ceiling on output size is the LLM context window, not the database engine.
 
 If you have a much larger schema (thousands of tables) or you want to keep the dump small enough to fit comfortably in an LLM session, every dump includes an `object_counts` field in its metadata so you can see the size at a glance. From there you have a few options for trimming:
 
 | Option | Effect |
 |---|---|
 | Comment out the `INDEXES` and `TRIGGER COUNTS` sections | Removes the largest per-table payloads while keeping columns, PKs, and FKs intact |
-| Set `@include_stats = FALSE` ([MySQL](https://dev.mysql.com/doc/refman/8.0/en/), [MariaDB](https://mariadb.org/)) or skip the stats CTE elsewhere | Drops row count and size estimates |
-| Filter by schema ([PostgreSQL](https://www.postgresql.org/) `@schema_filter`, [MySQL](https://www.mysql.com/) `@schema_filter`) | Dump one logical area at a time |
+| Set `@include_stats = FALSE` (MySQL, MariaDB) or skip the stats CTE elsewhere | Drops row count and size estimates |
+| Filter by schema (PostgreSQL `@schema_filter`, MySQL `@schema_filter`) | Dump one logical area at a time |
 | Run the script, then ask the LLM to summarize | Push the trimming logic to the consumer where it has more context |
 
 These are deliberate manual choices rather than automatic degradation: the script always reports the full structure of whatever you point it at, and the trimming decision belongs to the person who knows what they're going to do with the result.
@@ -332,7 +332,7 @@ Every script has the same top-level shape:
    - `What's captured:` — output sections with brief descriptions
    - `What's deliberately excluded for privacy:` — bulleted list
    - `<Engine>-specific notes:` — quirks specific to this engine
-2. **A single [`WITH ... SELECT`](https://en.wikipedia.org/wiki/Hierarchical_and_recursive_queries_in_SQL#Common_table_expression) query** comprising the body (Firebird uses the same shape, but its terminal `SELECT` assembles Markdown rather than JSON).
+2. **A single `WITH ... SELECT` query** comprising the body (Firebird uses the same shape, but its terminal `SELECT` assembles Markdown rather than JSON).
 3. **Section markers between CTEs.** Each logical group of CTEs is preceded by a three-line comment block:
    ```sql
    -- ====================================================================
@@ -362,17 +362,17 @@ Most scripts share the same ordered set of sections, omitting any that don't app
 | `METADATA` | the dump's metadata header (tool name, engine, timestamp, schema list, object counts) |
 | `FINAL ASSEMBLY` | the outermost `SELECT` that emits `schema_dump` |
 
-Engine-specific sections keep their own descriptive names. [PostgreSQL](https://www.postgresql.org/) has `INHERITANCE / PARTITION PARENTS` and `USER-DEFINED TYPES`. [MySQL](https://www.mysql.com/), [MariaDB](https://mariadb.org/), and [SQL Server](https://www.microsoft.com/en-us/sql-server) have `PARTITIONED TABLES` as a separate flag. [Firebird](https://firebirdsql.org/) has `TYPE RENDERING` and `USER RELATIONS` (Firebird-specific lookup CTEs) plus several Markdown assembly sections in place of the JSON `TABLES` / `VIEWS` blocks.
+Engine-specific sections keep their own descriptive names. PostgreSQL has `INHERITANCE / PARTITION PARENTS` and `USER-DEFINED TYPES`. MySQL, MariaDB, and SQL Server have `PARTITIONED TABLES` as a separate flag. Firebird has `TYPE RENDERING` and `USER RELATIONS` (Firebird-specific lookup CTEs) plus several Markdown assembly sections in place of the JSON `TABLES` / `VIEWS` blocks.
 
 ### Code style
 
 | Aspect | Convention |
 |---|---|
 | SQL keywords | UPPERCASE (`SELECT`, `FROM`, `JOIN`, `GROUP BY`) |
-| Identifiers | lowercase, except where the catalog itself dictates otherwise (`RDB$RELATIONS` in [Firebird](https://firebirdsql.org/file/documentation/html/en/refdocs/fblangref40/firebird-40-language-reference.html), `USER_TAB_COLS` in [Oracle](https://docs.oracle.com/en/database/oracle/oracle-database/19/refrn/USER_TAB_COLS.html), [`INFORMATION_SCHEMA.TABLES`](https://en.wikipedia.org/wiki/Information_schema) in standard SQL) |
+| Identifiers | lowercase, except where the catalog itself dictates otherwise (`RDB$RELATIONS` in Firebird, `USER_TAB_COLS` in Oracle, `INFORMATION_SCHEMA.TABLES` in standard SQL) |
 | Indentation | 4 spaces, no tabs |
 | Commas | trailing |
-| Line endings | [LF](https://en.wikipedia.org/wiki/Newline) |
+| Line endings | LF |
 | Trailing whitespace | none |
 | Line length | soft target around 80 columns |
 
@@ -387,15 +387,15 @@ Engine-specific sections keep their own descriptive names. [PostgreSQL](https://
 
 ## Requirements
 
-- A SQL client that can run a multi-CTE query and return a single text cell (JSON for most engines, Markdown for [Firebird](https://firebirdsql.org/))
-- Read permission on the database's [system catalogs](https://en.wikipedia.org/wiki/Database_catalog) and [`information_schema`](https://en.wikipedia.org/wiki/Information_schema)
-- No installs, no extensions, no [Python](https://www.python.org/) required
+- A SQL client that can run a multi-CTE query and return a single text cell (JSON for most engines, Markdown for Firebird)
+- Read permission on the database's system catalogs and `information_schema`
+- No installs, no extensions, no Python required
 
 ---
 
 ## Security and privacy
 
-- **Read-only.** Every script queries system catalogs and [`information_schema`](https://en.wikipedia.org/wiki/Information_schema) only. It never modifies the database, never queries row data, and never samples values from user columns.
+- **Read-only.** Every script queries system catalogs and `information_schema` only. It never modifies the database, never queries row data, and never samples values from user columns.
 - **Structure only, never values.** No field in the output can carry sensitive data by design. The guarantee comes from what the script doesn't read, not from filtering applied afterward.
 - **No network calls.** Everything runs in your SQL client against your database. Nothing leaves your environment until you choose to share the output.
 
@@ -413,7 +413,7 @@ The privacy stance is strong but not infinite. The following can appear in a dum
 
 The output is designed to be safe for external LLMs. That guarantee covers what the tool produces. It does not cover the service you send it to.
 
-Strong recommendation: use only an LLM your employer has explicitly vetted, or one with a contractual relationship (enterprise [API](https://www.anthropic.com/api) agreement, signed [BAA](https://www.hhs.gov/hipaa/for-professionals/covered-entities/sample-business-associate-agreement-provisions/index.html), private deployment, or documented institutional policy that permits the use). Even structural metadata describes systems that may contain protected data, and many organizations have policies on disclosing system descriptions to external services.
+Strong recommendation: use only an LLM your employer has explicitly vetted, or one with a contractual relationship (enterprise API agreement, signed [BAA](https://www.hhs.gov/hipaa/for-professionals/covered-entities/sample-business-associate-agreement-provisions/index.html), private deployment, or documented institutional policy that permits the use). Even structural metadata describes systems that may contain protected data, and many organizations have policies on disclosing system descriptions to external services.
 
 Before pasting a dump into any LLM:
 
