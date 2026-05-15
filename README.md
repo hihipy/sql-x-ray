@@ -268,17 +268,17 @@ Existence is still recorded where useful. `check_constraint_count: 3` tells the 
 
 ## Engine support
 
-| Engine | Script | Status | Minimum version |
-|---|---|---|---|
-| [PostgreSQL](https://dbdb.io/db/postgresql) | `scripts/postgres-xray.sql` | Stable | PostgreSQL 12 |
-| [MySQL](https://dbdb.io/db/mysql) | `scripts/mysql-xray.sql` | Stable | MySQL 8.0.16 |
-| [MariaDB](https://dbdb.io/db/mariadb) | `scripts/mariadb-xray.sql` | Stable | MariaDB 10.5 |
-| [SQL Server](https://dbdb.io/db/sql-server) | `scripts/sqlserver-xray.sql` | Stable | SQL Server 2022 |
-| [Firebird](https://dbdb.io/db/firebird) | `scripts/firebird-xray.sql` | Stable (Markdown output) | Firebird 4.0 |
-| [Oracle](https://dbdb.io/db/oracle) | `scripts/oracle-xray.sql` | Stable | Oracle 18c |
-| [SQLite](https://dbdb.io/db/sqlite) | `scripts/sqlite-xray.sql` | Stable | SQLite 3.44 |
-| [BigQuery](https://dbdb.io/db/bigquery) | `scripts/bigquery-xray.sql` | Draft (pending validation) | GoogleSQL |
-| [Snowflake](https://dbdb.io/db/snowflake) | `scripts/snowflake-xray.sql` | Planned | |
+| Engine                                              | Script                     | Status                     | Minimum version  |
+|-----------------------------------------------------|----------------------------|----------------------------|------------------|
+| [Firebird](https://dbdb.io/db/firebird)             | `scripts/firebird-xray.sql`   | Stable                     | Firebird 4.0     |
+| [MariaDB](https://dbdb.io/db/mariadb)               | `scripts/mariadb-xray.sql`    | Stable                     | MariaDB 10.5     |
+| [MySQL](https://dbdb.io/db/mysql)                   | `scripts/mysql-xray.sql`      | Stable                     | MySQL 8.0.16     |
+| [Oracle](https://dbdb.io/db/oracle)                 | `scripts/oracle-xray.sql`     | Stable                     | Oracle 18c       |
+| [PostgreSQL](https://dbdb.io/db/postgresql)         | `scripts/postgres-xray.sql`   | Stable                     | PostgreSQL 12    |
+| [SQL Server](https://dbdb.io/db/sql-server)         | `scripts/sqlserver-xray.sql`  | Stable                     | SQL Server 2022  |
+| [SQLite](https://dbdb.io/db/sqlite)                 | `scripts/sqlite-xray.sql`     | Stable                     | SQLite 3.44      |
+| [BigQuery](https://dbdb.io/db/bigquery)             | `scripts/bigquery-xray.sql`   | Draft (pending validation) | GoogleSQL        |
+| [Snowflake](https://dbdb.io/db/snowflake)           | `scripts/snowflake-xray.sql`  | Planned                    |                  |
 
 Engine names link to their entry in [Database of Databases](https://dbdb.io), the database encyclopedia maintained by Carnegie Mellon University.
 
