@@ -20,19 +20,19 @@ The fastest way to see the output is to run it against a preloaded sample databa
 2. Pick a ReadOnly sample database from the engine dropdown
 3. Paste the matching script from this repo (e.g. `scripts/postgres-xray.sql`)
 4. Click **Run SQL code**
-5. The single result cell contains the full JSON dump. Copy it, paste into your LLM of choice, done.
+5. The single result cell contains the full dump (JSON for most engines, Markdown for Firebird). Copy it, paste into your LLM of choice, done.
 
 Sample databases available on sqlize.online:
 
 | Engine | Sample schema |
 |---|---|
-| PostgreSQL 18 Bookings (ReadOnly) | Airline reservations: flights, bookings, tickets, boarding passes, seats |
-| PostgreSQL 17 + PostGIS WorkShop (ReadOnly) | Spatial and geographic data |
-| MySQL 9.7 Sakila (ReadOnly) | DVD rental store (the canonical sample) |
-| MariaDB 11.8 OpenFlights (ReadOnly) | Airport, airline, and route data |
-| MS SQL Server 2022 AdventureWorks (ReadOnly) | Microsoft's bicycle company (68 tables, 5 schemas) |
-| Oracle Database 19c HR | Classic Oracle HR sample (employees, departments, jobs) |
-| Firebird 4.0 Employee | Firebird's bundled sample |
+| PostgreSQL 18 [Bookings](https://postgrespro.com/community/demodb) (ReadOnly) | Airline reservations: flights, bookings, tickets, boarding passes, seats |
+| PostgreSQL 17 + PostGIS [WorkShop](https://postgis.net/workshops/postgis-intro/) (ReadOnly) | Spatial and geographic data |
+| MySQL 9.7 [Sakila](https://dev.mysql.com/doc/sakila/en/) (ReadOnly) | DVD rental store (the canonical sample) |
+| MariaDB 11.8 [OpenFlights](https://openflights.org/data.html) (ReadOnly) | Airport, airline, and route data |
+| MS SQL Server 2022 [AdventureWorks](https://learn.microsoft.com/en-us/sql/samples/adventureworks-install-configure) (ReadOnly) | Microsoft's bicycle company (68 tables, 5 schemas) |
+| Oracle Database 19c [HR](https://docs.oracle.com/en/database/oracle/oracle-database/19/comsc/installing-sample-schemas.html) | Classic Oracle HR sample (employees, departments, jobs) |
+| Firebird 4.0 [Employee](https://firebirdsql.org/manual/qsg2-installing.html) | Firebird's bundled sample |
 
 This is also the right way to validate a script after editing it. Test against a known schema before pointing it at your real database.
 
@@ -176,12 +176,25 @@ Existence is still recorded where useful. `check_constraint_count: 3` tells the 
 
 | Engine | Script | Status | Minimum version |
 |---|---|---|---|
-| PostgreSQL | `scripts/postgres-xray.sql` | Stable | PostgreSQL 12 |
-| MySQL | `scripts/mysql-xray.sql` | Stable | MySQL 8.0.16 |
-| MariaDB | `scripts/mariadb-xray.sql` | Stable | MariaDB 10.5 |
-| SQL Server | `scripts/sqlserver-xray.sql` | Stable | SQL Server 2022 |
-| Snowflake | `scripts/snowflake-xray.sql` | Planned | |
-| BigQuery | `scripts/bigquery-xray.sql` | Planned | |
+| [PostgreSQL](https://dbdb.io/db/postgresql) | `scripts/postgres-xray.sql` | Stable | PostgreSQL 12 |
+| [MySQL](https://dbdb.io/db/mysql) | `scripts/mysql-xray.sql` | Stable | MySQL 8.0.16 |
+| [MariaDB](https://dbdb.io/db/mariadb) | `scripts/mariadb-xray.sql` | Stable | MariaDB 10.5 |
+| [SQL Server](https://dbdb.io/db/sql-server) | `scripts/sqlserver-xray.sql` | Stable | SQL Server 2022 |
+| [Firebird](https://dbdb.io/db/firebird) | `scripts/firebird-xray.sql` | Stable (Markdown output) | Firebird 4.0 |
+| [Snowflake](https://dbdb.io/db/snowflake) | `scripts/snowflake-xray.sql` | Planned | |
+| [BigQuery](https://dbdb.io/db/bigquery) | `scripts/bigquery-xray.sql` | Planned | |
+
+Engine names link to their entry in [Database of Databases](https://dbdb.io), the database encyclopedia maintained by Carnegie Mellon University.
+
+### Why Firebird outputs Markdown instead of JSON
+
+Firebird 4.0 has no native JSON functions. `JSON_OBJECT`, `JSON_ARRAYAGG`, and `JSON_QUERY` are still in proposal stage for future releases (likely 6.0+). Building JSON in Firebird 4.0 would mean fully manual string concatenation with explicit quote escaping for every key and value, plus carefully tracking opening and closing braces by hand. That path is doable but verbose and error-prone, and `LIST()` does not support `ORDER BY` so every aggregation needs a derived-table wrapper just to get rows in a stable order.
+
+Markdown construction needs the same aggregation tricks but skips the structural punctuation and escaping rules, which makes the script considerably less fragile. The output is still single-column text and still LLM-friendly. The trade-off is that Firebird dumps are not programmatically parseable the way the JSON dumps are, so any tooling that consumes sql-x-ray output needs to handle the format difference for this one engine.
+
+If you specifically need JSON from Firebird, the natural path is to wait for native JSON support in a future release rather than build a fragile string-concatenation version now.
+
+### MySQL and MariaDB on hosted sandboxes
 
 A note on the MySQL and MariaDB scripts: a small number of hosted SQL sandbox environments (including sqlize.online) ship an `information_schema` with mixed `utf8mb3` collations and a query optimizer that drops explicit collation conversions during CTE materialization. On those environments some cross-CTE joins (most visibly `routines` and `trigger_count`) can come back empty even though the script handles the collation mismatch correctly. Standard MySQL 8+/9+ and MariaDB 10.5+ installations use `utf8mb4` throughout `information_schema` and are not affected.
 
@@ -189,7 +202,7 @@ A note on the MySQL and MariaDB scripts: a small number of hosted SQL sandbox en
 
 ## Requirements
 
-- A SQL client that can run a multi-CTE query and return a single JSON cell
+- A SQL client that can run a multi-CTE query and return a single text cell (JSON for most engines, Markdown for Firebird)
 - Read permission on the database's system catalogs and `information_schema`
 - No installs, no extensions, no Python required
 
