@@ -178,7 +178,7 @@ Existence is still recorded where useful. `check_constraint_count: 3` tells the 
 | Engine | Script | Status | Minimum version |
 |---|---|---|---|
 | PostgreSQL | `scripts/postgres-xray.sql` | Stable | PostgreSQL 12 |
-| SQLite | `scripts/sqlite-xray.sql` | Planned | |
+| SQLite | `scripts/sqlite-xray.sql` | Planned | SQLite 3.38 |
 | MySQL / MariaDB | `scripts/mysql-xray.sql` | Planned | |
 | SQL Server | `scripts/sqlserver-xray.sql` | Planned | |
 | Snowflake | `scripts/snowflake-xray.sql` | Planned | |
