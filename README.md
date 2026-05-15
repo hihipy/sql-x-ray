@@ -278,7 +278,7 @@ Existence is still recorded where useful. `check_constraint_count: 3` tells the 
 | [Firebird](https://dbdb.io/db/firebird) | `scripts/firebird-xray.sql` | Stable (Markdown output) | [Firebird 4.0](https://firebirdsql.org/en/firebird-4-0/) |
 | [Oracle](https://dbdb.io/db/oracle) | `scripts/oracle-xray.sql` | Stable | [Oracle 18c](https://docs.oracle.com/en/database/oracle/oracle-database/18/) |
 | [SQLite](https://dbdb.io/db/sqlite) | `scripts/sqlite-xray.sql` | Stable | [SQLite 3.44](https://www.sqlite.org/releaselog/3_44_0.html) |
-| [BigQuery](https://dbdb.io/db/bigquery) | `scripts/bigquery-xray.sql` | Draft (pending validation) | [GoogleSQL](https://cloud.google.com/bigquery/docs/introduction-sql) |
+| [BigQuery](https://dbdb.io/db/bigquery) | `scripts/bigquery-xray.sql` | Stable | [GoogleSQL](https://cloud.google.com/bigquery/docs/introduction-sql) |
 | [Snowflake](https://dbdb.io/db/snowflake) | `scripts/snowflake-xray.sql` | Planned | |
 
 Engine names link to their entry in [Database of Databases](https://dbdb.io), the database encyclopedia maintained by Carnegie Mellon University.
