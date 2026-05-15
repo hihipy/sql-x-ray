@@ -1,5 +1,8 @@
 # sql-x-ray
 
+[![Link Check](https://github.com/hihipy/sql-x-ray/actions/workflows/links.yml/badge.svg)](https://github.com/hihipy/sql-x-ray/actions/workflows/links.yml)
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+
 **See the structure, not the data.**
 
 `sql-x-ray` produces a privacy-safe structural dump of a SQL database, designed as priming context for an LLM. Structure only, never values: no defaults, no constraint expressions, no view bodies, no enum labels, no sample data. Safe to share with any LLM regardless of what your database contains.
@@ -28,7 +31,7 @@ Sample databases available on sqlize.online:
 |---|---|
 | [Firebird 4.0 Employee](https://firebirdsql.org/manual/qsg2-installing.html) | Firebird's bundled sample |
 | [MariaDB 11.8 OpenFlights](https://openflights.org/data.html) (ReadOnly) | Airport, airline, and route data |
-| [MS SQL Server 2022 AdventureWorks](https://learn.microsoft.com/en-us/sql/samples/adventureworks-install-configure) (ReadOnly) | Microsoft's bicycle company (68 tables, 5 schemas) |
+| [MS SQL Server 2022 AdventureWorks](https://learn.microsoft.com/en-us/sql/samples/adventureworks-install-configure?view=sql-server-ver17&tabs=ssms) (ReadOnly) | Microsoft's bicycle company (68 tables, 5 schemas) |
 | [MySQL 9.7 Sakila](https://dev.mysql.com/doc/sakila/en/) (ReadOnly) | DVD rental store (the canonical sample) |
 | [Oracle Database 19c HR](https://docs.oracle.com/en/database/oracle/oracle-database/19/comsc/installing-sample-schemas.html) | Classic Oracle HR sample (employees, departments, jobs) |
 | [PostgreSQL 17 + PostGIS WorkShop](https://postgis.net/workshops/postgis-intro/) (ReadOnly) | Spatial and geographic data |
@@ -122,7 +125,7 @@ An LLM can use this to write a correct join between `orders` and `customers` (ri
 
 1. Open the script for your engine in the `scripts/` folder
 2. Adjust the `params` block at the top of the file (schema filter, whether to include row counts, whether to pretty-print)
-3. Run the script in any SQL client ([DBeaver](https://dbeaver.io/), [DataGrip](https://www.jetbrains.com/datagrip/), [psql](https://www.postgresql.org/docs/current/app-psql.html), [pgAdmin](https://www.pgadmin.org/), [Metabase](https://www.metabase.com/), [Insight](https://insight.openclinica.com/), [SSMS](https://learn.microsoft.com/en-us/sql/ssms/))
+3. Run the script in any SQL client ([DBeaver](https://dbeaver.io/), [DataGrip](https://www.jetbrains.com/datagrip/), [psql](https://www.postgresql.org/docs/current/app-psql.html), [pgAdmin](https://www.pgadmin.org/), [Metabase](https://www.metabase.com/), Insight, [SSMS](https://learn.microsoft.com/en-us/sql/ssms/))
 4. The result is a single cell containing a JSON document. Copy and save it as `schema.json`.
 
 To feed the dump to an LLM, paste it into a chat with a short intro:
@@ -209,7 +212,7 @@ erDiagram
 
 | Target | What to ask for |
 |---|---|
-| Python ORMs | [SQLAlchemy](https://www.sqlalchemy.org/) 2.0 `Mapped[]` models, [Django](https://docs.djangoproject.com/en/stable/topics/db/models/) models, [Tortoise ORM](https://tortoise.github.io/), [peewee](http://docs.peewee-orm.com/) |
+| Python ORMs | [SQLAlchemy](https://www.sqlalchemy.org/) 2.0 `Mapped[]` models, [Django](https://docs.djangoproject.com/en/stable/topics/db/models/) models, [Tortoise ORM](https://tortoise.github.io/), [peewee](https://docs.peewee-orm.com/) |
 | TypeScript / JS | [Prisma](https://www.prisma.io/) schemas, [TypeORM](https://typeorm.io/) entities, [Drizzle ORM](https://orm.drizzle.team/) schemas, [Zod](https://zod.dev/) validators |
 | Go | [GORM](https://gorm.io/) structs, [sqlc](https://sqlc.dev/) queries with `CREATE TABLE` references |
 | Type definitions | [Pydantic](https://docs.pydantic.dev/) v2 models, TypeScript interfaces, [JSON Schema](https://json-schema.org/), [protobuf](https://protobuf.dev/), [GraphQL SDL](https://graphql.org/learn/schema/) |
@@ -275,7 +278,7 @@ Existence is still recorded where useful. `check_constraint_count: 3` tells the 
 | [Firebird](https://dbdb.io/db/firebird) | `scripts/firebird-xray.sql` | Stable (Markdown output) | [Firebird 4.0](https://firebirdsql.org/en/firebird-4-0/) |
 | [MariaDB](https://dbdb.io/db/mariadb) | `scripts/mariadb-xray.sql` | Stable | [MariaDB 10.5](https://mariadb.com/kb/en/changes-improvements-in-mariadb-105/) |
 | [MySQL](https://dbdb.io/db/mysql) | `scripts/mysql-xray.sql` | Stable | [MySQL 8.0.16](https://dev.mysql.com/doc/relnotes/mysql/8.0/en/news-8-0-16.html) |
-| [Oracle](https://dbdb.io/db/oracle) | `scripts/oracle-xray.sql` | Stable | [Oracle 18c](https://docs.oracle.com/en/database/oracle/oracle-database/18/) |
+| [Oracle](https://dbdb.io/db/oracle-rdbms) | `scripts/oracle-xray.sql` | Stable | [Oracle 18c](https://docs.oracle.com/en/database/oracle/oracle-database/18/) |
 | [PostgreSQL](https://dbdb.io/db/postgresql) | `scripts/postgres-xray.sql` | Stable | [PostgreSQL 12](https://www.postgresql.org/docs/12/release-12.html) |
 | [SQL Server](https://dbdb.io/db/sql-server) | `scripts/sqlserver-xray.sql` | Stable | [SQL Server 2022](https://learn.microsoft.com/en-us/sql/sql-server/what-s-new-in-sql-server-2022) |
 | [SQLite](https://dbdb.io/db/sqlite) | `scripts/sqlite-xray.sql` | Stable | [SQLite 3.44](https://www.sqlite.org/releaselog/3_44_0.html) |
