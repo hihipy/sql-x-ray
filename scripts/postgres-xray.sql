@@ -32,8 +32,8 @@
 --   views      schema-qualified name and column list with types
 --   routines   user-defined functions and procedures (name, kind,
 --              language, arguments, return type), no bodies
---   sequences  user-defined sequences (name only, no start,
---              increment, or current value)
+--   sequences  user-defined sequences (name and data type only, no
+--              start, increment, or current value)
 --   packages   empty array (PostgreSQL has no package concept)
 --
 -- What's deliberately excluded for privacy:
@@ -507,18 +507,28 @@ routines_json AS (
 
 -- =====================================================================
 -- SEQUENCES
+-- Sourced from pg_catalog (pg_class + pg_sequence) rather than
+-- information_schema.sequences. The information_schema view is
+-- privilege-filtered: it only lists sequences the current role holds a
+-- privilege on, so least-privilege read-only roles (a common target for
+-- this tool) silently see zero sequences. pg_catalog is not filtered
+-- that way, so existence is reported accurately. Extension-owned
+-- sequences are filtered to match the rest of the script.
 -- =====================================================================
 sequences_json AS (
     SELECT jsonb_agg(
         jsonb_build_object(
-            'schema',    s.sequence_schema,
-            'name',      s.sequence_name,
-            'data_type', s.data_type
+            'schema',    ts.schema_name,
+            'name',      c.relname,
+            'data_type', format_type(s.seqtypid, NULL)
         )
-        ORDER BY s.sequence_schema, s.sequence_name
+        ORDER BY ts.schema_name, c.relname
     ) AS payload
-    FROM information_schema.sequences s
-    JOIN target_schemas ts ON ts.schema_name = s.sequence_schema
+    FROM pg_class c
+    JOIN target_schemas ts ON ts.schema_oid = c.relnamespace
+    JOIN pg_sequence s ON s.seqrelid = c.oid
+    WHERE c.relkind = 'S'
+      AND NOT EXISTS (SELECT 1 FROM extension_owned eo WHERE eo.oid = c.oid)
 ),
 
 -- =====================================================================
