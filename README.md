@@ -128,13 +128,24 @@ An LLM can use this to write a correct join between `orders` and `customers` (ri
 3. Run the script in any SQL client ([DBeaver](https://dbeaver.io/), [DataGrip](https://www.jetbrains.com/datagrip/), [psql](https://www.postgresql.org/docs/current/app-psql.html), [pgAdmin](https://www.pgadmin.org/), [Metabase](https://www.metabase.com/), Insight, [SSMS](https://learn.microsoft.com/en-us/sql/ssms/))
 4. The result is a single cell containing a JSON document. Copy and save it as `schema.json`.
 
-Some clients escape that single cell when you use their "export" or "download as JSON" feature, wrapping the whole dump into a string like `[{"schema_dump":"{\n    \"tables\": [...escaped..."}]`. The real JSON is intact, just nested and escaped. Either copy the cell contents directly instead of using the JSON export, or unwrap the downloaded file in one pass:
+Some clients escape that single cell when you use their "export" or "download as JSON" feature, wrapping the whole dump into a string like `[{"schema_dump":"{\n    \"tables\": [...escaped..."}]`. The real JSON is intact, just nested and escaped. The fix is to pull out the `schema_dump` field, which unescapes it in one pass.
+
+**macOS / Linux** (with [`jq`](https://jqlang.github.io/jq/)):
 
 ```bash
 jq -r '.[0].schema_dump' downloaded.json > schema.json
 ```
 
-The `-r` flag emits the raw, unescaped string. (Observed with [Metabase](https://www.metabase.com/); any client that treats its result grid as JSON behaves the same way.)
+**Windows** (PowerShell, no install needed since it parses JSON natively):
+
+```powershell
+$text = (Get-Content downloaded.json -Raw | ConvertFrom-Json)[0].schema_dump
+[IO.File]::WriteAllText("$PWD\schema.json", $text)
+```
+
+Both do the same thing: emit the raw, unescaped string (`jq -r` for the raw flag, `[0].schema_dump` for the field). On Windows, prefer `[IO.File]::WriteAllText` over `>` redirection: PowerShell's `>` re-encodes the file to UTF-16, and `Set-Content -Encoding utf8` prepends a byte-order mark, both of which trip strict JSON parsers. Also avoid round-tripping through `ConvertTo-Json`, which escapes `<` and `>` into `\u003c` / `\u003e` and would mangle the `<expression>` placeholders this tool emits for expression indexes.
+
+If you'd rather not run anything, most clients let you click into the result cell and copy its contents directly, which is the already-unescaped JSON with no wrapper. (The escaping was observed with [Metabase](https://www.metabase.com/); any client that treats its result grid as JSON behaves the same way.)
 
 To feed the dump to an LLM, paste it into a chat with a short intro:
 
