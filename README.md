@@ -128,6 +128,14 @@ An LLM can use this to write a correct join between `orders` and `customers` (ri
 3. Run the script in any SQL client ([DBeaver](https://dbeaver.io/), [DataGrip](https://www.jetbrains.com/datagrip/), [psql](https://www.postgresql.org/docs/current/app-psql.html), [pgAdmin](https://www.pgadmin.org/), [Metabase](https://www.metabase.com/), Insight, [SSMS](https://learn.microsoft.com/en-us/sql/ssms/))
 4. The result is a single cell containing a JSON document. Copy and save it as `schema.json`.
 
+Some clients escape that single cell when you use their "export" or "download as JSON" feature, wrapping the whole dump into a string like `[{"schema_dump":"{\n    \"tables\": [...escaped..."}]`. The real JSON is intact, just nested and escaped. Either copy the cell contents directly instead of using the JSON export, or unwrap the downloaded file in one pass:
+
+```bash
+jq -r '.[0].schema_dump' downloaded.json > schema.json
+```
+
+The `-r` flag emits the raw, unescaped string. (Observed with [Metabase](https://www.metabase.com/); any client that treats its result grid as JSON behaves the same way.)
+
 To feed the dump to an LLM, paste it into a chat with a short intro:
 
 > Here is the structural metadata for a SQL database I work with. It contains only structure, no values, no row data, no view bodies. I'll be asking you to help me write queries against this schema.
@@ -318,7 +326,7 @@ The MySQL and MariaDB scripts also set [`group_concat_max_len = 4294967295`](htt
 
 ## Script conventions
 
-All seven scripts share a consistent structure so they read alike. If you can navigate one, you can navigate the rest.
+All eight scripts share a consistent structure so they read alike. If you can navigate one, you can navigate the rest.
 
 ### File layout
 
@@ -408,6 +416,7 @@ The privacy stance is strong but not infinite. The following can appear in a dum
 - **Names of schemas, tables, columns, indexes, and constraints.** Almost always describe types of data rather than data itself, but proprietary product names or classified project codenames could be considered sensitive. Review before sharing externally if this applies to you.
 - **Estimated row counts.** Aggregate counts are universally safe under [HIPAA](https://www.hhs.gov/hipaa/index.html), [GDPR](https://gdpr.eu/), and similar regimes, but in very small populations a count could narrow identification. Set `include_stats = FALSE` if needed.
 - **Foreign key target names.** Reveal which tables relate to which.
+- **Sequence visibility on least-privilege roles.** Sequence reporting can depend on the connecting role's privileges. The PostgreSQL script reads sequences from `pg_catalog` (`pg_class` + `pg_sequence`), which is not privilege-filtered, so it reports them accurately even on read-only roles. The SQL Server script (`sys.sequences`) and the MariaDB script (`information_schema`) are subject to engine-level metadata visibility and may under-report sequences unless the role has been granted `VIEW DEFINITION` (SQL Server) or a privilege on the objects (MariaDB). Oracle (`user_sequences`) reports the connected user's own sequences and is unaffected.
 
 ---
 
