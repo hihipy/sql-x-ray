@@ -568,48 +568,73 @@ types_json AS (
           SELECT 1 FROM pg_depend d
           WHERE d.objid = t.oid AND d.deptype = 'e'
       )
-)
+),
 
 -- =====================================================================
--- FINAL ASSEMBLY
+-- OBJECT COUNTS
+-- Each payload array length is read exactly once here, rather than
+-- inline in the metadata block, so the counts are computed in one place.
 -- =====================================================================
-SELECT
-    CASE
-        WHEN (SELECT pretty_print FROM params) THEN jsonb_pretty(result)
-        ELSE result::text
-    END AS schema_dump
-FROM (
+object_counts AS (
+    SELECT jsonb_build_object(
+        'tables',    COALESCE(jsonb_array_length((SELECT payload FROM tables_json)),    0),
+        'views',     COALESCE(jsonb_array_length((SELECT payload FROM views_json)),     0),
+        'routines',  COALESCE(jsonb_array_length((SELECT payload FROM routines_json)),  0),
+        'sequences', COALESCE(jsonb_array_length((SELECT payload FROM sequences_json)), 0),
+        'types',     COALESCE(jsonb_array_length((SELECT payload FROM types_json)),     0)
+    ) AS payload
+),
+
+-- =====================================================================
+-- METADATA
+-- The dump's metadata header. Pulled into its own CTE so the final
+-- assembly reads as a flat list of named parts.
+-- =====================================================================
+metadata_block AS (
+    SELECT jsonb_build_object(
+        'tool_name',        'sql-x-ray',
+        'engine',           'postgresql',
+        'engine_version',   split_part(current_setting('server_version'), ' ', 1),
+        'database',         current_database(),
+        'generated_at',     to_char(now() AT TIME ZONE 'UTC',
+                                   'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+        'schema_filter',    (SELECT schema_filter FROM params),
+        'schemas',          (SELECT jsonb_agg(schema_name ORDER BY schema_name)
+                             FROM target_schemas),
+        'object_counts',    (SELECT payload FROM object_counts),
+        'privacy_note',
+            'This document contains only structural metadata. '
+         || 'It deliberately excludes: default value literals, '
+         || 'check constraint expressions, view and function bodies, '
+         || 'enum value labels, descriptions/comments, and all row data. '
+         || 'Existence is recorded via counts (e.g. check_constraint_count); '
+         || 'contents are not. Expression indexes are marked as '
+         || '"<expression>" in column lists.'
+    ) AS payload
+),
+
+-- =====================================================================
+-- FINAL JSON
+-- Assembles the top-level document from the named parts above.
+-- =====================================================================
+final_json AS (
     SELECT jsonb_strip_nulls(jsonb_build_object(
-        'metadata', jsonb_build_object(
-            'tool_name',        'sql-x-ray',
-            'engine',           'postgresql',
-            'engine_version',   split_part(current_setting('server_version'), ' ', 1),
-            'database',         current_database(),
-            'generated_at',     to_char(now() AT TIME ZONE 'UTC',
-                                       'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
-            'schema_filter',    (SELECT schema_filter FROM params),
-            'schemas',          (SELECT jsonb_agg(schema_name ORDER BY schema_name)
-                                 FROM target_schemas),
-            'object_counts',    jsonb_build_object(
-                'tables',    COALESCE(jsonb_array_length((SELECT payload FROM tables_json)),    0),
-                'views',     COALESCE(jsonb_array_length((SELECT payload FROM views_json)),     0),
-                'routines',  COALESCE(jsonb_array_length((SELECT payload FROM routines_json)),  0),
-                'sequences', COALESCE(jsonb_array_length((SELECT payload FROM sequences_json)), 0),
-                'types',     COALESCE(jsonb_array_length((SELECT payload FROM types_json)),     0)
-            ),
-            'privacy_note',
-                'This document contains only structural metadata. '
-             || 'It deliberately excludes: default value literals, '
-             || 'check constraint expressions, view and function bodies, '
-             || 'enum value labels, descriptions/comments, and all row data. '
-             || 'Existence is recorded via counts (e.g. check_constraint_count); '
-             || 'contents are not. Expression indexes are marked as '
-             || '"<expression>" in column lists.'
-        ),
+        'metadata',  (SELECT payload FROM metadata_block),
         'tables',    COALESCE((SELECT payload FROM tables_json),    '[]'::jsonb),
         'views',     COALESCE((SELECT payload FROM views_json),     '[]'::jsonb),
         'routines',  COALESCE((SELECT payload FROM routines_json),  '[]'::jsonb),
         'sequences', COALESCE((SELECT payload FROM sequences_json), '[]'::jsonb),
         'types',     COALESCE((SELECT payload FROM types_json),     '[]'::jsonb)
     )) AS result
-) final;
+)
+
+-- =====================================================================
+-- FINAL ASSEMBLY
+-- Pretty-print switch only; all assembly happens in the CTEs above.
+-- =====================================================================
+SELECT
+    CASE
+        WHEN (SELECT pretty_print FROM params) THEN jsonb_pretty(result)
+        ELSE result::text
+    END AS schema_dump
+FROM final_json;
