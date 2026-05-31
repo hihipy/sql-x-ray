@@ -5,7 +5,7 @@
 
 **Built with**
 
-[![SQL](https://img.shields.io/badge/SQL-4479A1?style=flat&logo=mysql&logoColor=white)](https://www.iso.org/standard/76583.html)
+[![SQL](https://img.shields.io/badge/SQL-4B5563?style=flat&logoColor=white)](https://www.iso.org/standard/76583.html)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat&logo=postgresql&logoColor=white)](https://postgresql.org)
 [![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=mysql&logoColor=white)](https://mysql.com)
 [![MariaDB](https://img.shields.io/badge/MariaDB-003545?style=flat&logo=mariadb&logoColor=white)](https://mariadb.org)
