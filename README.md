@@ -359,19 +359,19 @@ Every script has the same top-level shape:
    - Title: `sql-x-ray for <Engine> <minimum-version>+`
    - One- or two-sentence description
    - `Repository:` and `License:` lines
-   - `Target:` — engine version compatibility notes
-   - `Catalog source:` — which system catalog is used and why
-   - `Usage:` — numbered steps to run the script
-   - `What's captured:` — output sections with brief descriptions
-   - `What's deliberately excluded for privacy:` — bulleted list
-   - `<Engine>-specific notes:` — quirks specific to this engine
+   - `Target:` (engine version compatibility notes)
+   - `Catalog source:` (which system catalog is used and why)
+   - `Usage:` (numbered steps to run the script)
+   - `What's captured:` (output sections with brief descriptions)
+   - `What's deliberately excluded for privacy:` (bulleted list)
+   - `<Engine>-specific notes:` (quirks specific to this engine)
 2. **A single `WITH ... SELECT` query** comprising the body (Firebird uses the same shape, but its terminal `SELECT` assembles Markdown rather than JSON).
 3. **Section markers between CTEs.** Each logical group of CTEs is preceded by a three-line comment block:
-   ```sql
+```sql
    -- ====================================================================
    -- SECTION NAME
    -- ====================================================================
-   ```
+```
 
 ### Canonical section names
 
