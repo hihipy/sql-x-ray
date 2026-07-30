@@ -42,7 +42,7 @@ Sample databases available on sqlize.online:
 | Engine | Sample schema |
 |---|---|
 | [Firebird 4.0 Employee](https://firebirdsql.org/manual/qsg2-installing.html) | Firebird's bundled sample |
-| [MariaDB 11.8 OpenFlights](https://openflights.org/data.html) (ReadOnly) | Airport, airline, and route data |
+| [MariaDB 11.8 OpenFlights](https://openflights.org/data.php) (ReadOnly) | Airport, airline, and route data |
 | [MS SQL Server 2022 AdventureWorks](https://learn.microsoft.com/en-us/sql/samples/adventureworks-install-configure?view=sql-server-ver17&tabs=ssms) (ReadOnly) | Microsoft's bicycle company (68 tables, 5 schemas) |
 | [MySQL 9.7 Sakila](https://dev.mysql.com/doc/sakila/en/) (ReadOnly) | DVD rental store (the canonical sample) |
 | [Oracle Database 19c HR](https://docs.oracle.com/en/database/oracle/oracle-database/19/comsc/installing-sample-schemas.html) | Classic Oracle HR sample (employees, departments, jobs) |
