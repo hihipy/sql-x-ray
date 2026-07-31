@@ -17,13 +17,13 @@
 
 **See the structure, not the data.**
 
-`sql-x-ray` produces a privacy-safe structural dump of a SQL database, designed as priming context for an LLM. Structure only, never values: no defaults, no constraint expressions, no view bodies, no enum labels, no sample data. Safe to share with any LLM regardless of what your database contains.
+SQL X-Ray produces a privacy-safe structural dump of a SQL database, designed as priming context for an LLM. Structure only, never values: no defaults, no constraint expressions, no view bodies, no enum labels, no sample data. Safe to share with any LLM regardless of what your database contains.
 
 ---
 
 ## Why this exists
 
-Copying a full schema into an LLM chat fails on size for any non-trivial database, and even when it fits, view bodies and `CHECK` expressions can leak business logic or literal values. Sample queries are slow and error-prone. `sql-x-ray` gives the LLM exactly what it needs to write accurate queries against your schema (tables, columns, types, relationships, indexes) and nothing it shouldn't have.
+Copying a full schema into an LLM chat fails on size for any non-trivial database, and even when it fits, view bodies and `CHECK` expressions can leak business logic or literal values. Sample queries are slow and error-prone. SQL X-Ray gives the LLM exactly what it needs to write accurate queries against your schema (tables, columns, types, relationships, indexes) and nothing it shouldn't have.
 
 ---
 
@@ -456,7 +456,7 @@ Before pasting a dump into any LLM:
 - Prefer enterprise or API tiers with zero-retention guarantees over free consumer chat tiers
 - When in doubt, ask your [DPO](https://gdpr.eu/data-protection-officer/), CISO, IT, or compliance contact
 
-The author and contributors of `sql-x-ray` accept no liability for misuse, data exposure, regulatory consequences, or contractual breaches that result from sharing dump output with third-party services. The tool's privacy properties are a starting point, not a substitute for institutional review.
+The author and contributors of SQL X-Ray accept no liability for misuse, data exposure, regulatory consequences, or contractual breaches that result from sharing dump output with third-party services. The tool's privacy properties are a starting point, not a substitute for institutional review.
 
 ---
 
