@@ -6,14 +6,14 @@
 **Built with**
 
 [![BigQuery](https://img.shields.io/badge/BigQuery-669DF6?style=flat&logo=googlebigquery&logoColor=white)](https://cloud.google.com/bigquery)
-[![Firebird](https://img.shields.io/badge/Firebird-F40000?style=flat&logoColor=white)](https://firebirdsql.org)
+[![Firebird](https://img.shields.io/badge/Firebird-F40000?style=flat&logo=data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAAEAAAAA8AQMAAADsRy4nAAAABlBMVEX%2F%2F%2F%2F%2F%2F%2F9VfPVsAAAAAXRSTlMAQObYZgAAANdJREFUeNqF0DFOw0AUhOFv1xZxgRSXdOQI3MCh4RwpKVNSIS6GCDfgCMkNHERhpMSPYh0KFGCqXzOa3acBLTLcK0rD5FzUEzQmaE%2FgBAseQXeYDVN0VWBp1at1t5GeXmXbtWwj6y%2BnB2bRRUAVLzGSpBF2J%2FhMBEQ2gnfziIgI%2BQYc5SU4UEVERC%2BV0rHOllCp9A%2BQTP1ttgZtKl%2BlttQHcg0DuUktb%2BS9fWNTrp7HtsB1DGWElbo4ESMV0vNdFKv1q76Xb36uegYWZ6MKDh%2F%2F14ez0R%2F6Auk%2FS5evvJGZAAAAAElFTkSuQmCC)](https://firebirdsql.org)
 [![MariaDB](https://img.shields.io/badge/MariaDB-003545?style=flat&logo=mariadb&logoColor=white)](https://mariadb.org)
 [![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=mysql&logoColor=white)](https://mysql.com)
-[![Oracle](https://img.shields.io/badge/Oracle-F80000?style=flat&logo=oracle&logoColor=white)](https://oracle.com/database/)
+[![Oracle](https://img.shields.io/badge/Oracle-F80000?style=flat&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyBmaWxsPSIjZmZmZmZmIiByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTYuNDEyIDQuNDEyaC04LjgyYTcuNTg4IDcuNTg4IDAgMCAwLS4wMDggMTUuMTc2aDguODI4YTcuNTg4IDcuNTg4IDAgMCAwIDAtMTUuMTc2em0tLjE5MyAxMi41MDJINy43ODZhNC45MTUgNC45MTUgMCAwIDEgMC05LjgyOGg4LjQzM2E0LjkxNCA0LjkxNCAwIDEgMSAwIDkuODI4eiIvPjwvc3ZnPg%3D%3D)](https://oracle.com/database/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat&logo=postgresql&logoColor=white)](https://postgresql.org)
-[![SQL](https://img.shields.io/badge/SQL-4B5563?style=flat&logoColor=white)](https://www.iso.org/standard/76583.html)
+[![SQL](https://img.shields.io/badge/SQL-4B5563?style=flat&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyBmaWxsPSIjZmZmZmZmIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI%2BPHBhdGggZD0iTTEyIDNDNy41OCAzIDQgNC4zNCA0IDZ2MTJjMCAxLjY2IDMuNTggMyA4IDNzOC0xLjM0IDgtM1Y2YzAtMS42Ni0zLjU4LTMtOC0zem02IDE1YzAgLjMtMi4xMyAxLjUtNiAxLjVTNiAxOC4zIDYgMTh2LTIuMjNjMS42MS43OCAzLjkgMS4yMyA2IDEuMjNzNC4zOS0uNDUgNi0xLjIzVjE4em0wLTQuNWMwIC4zLTIuMTMgMS41LTYgMS41cy02LTEuMi02LTEuNXYtMi4yM0M3LjYxIDEyLjA1IDkuOSAxMi41IDEyIDEyLjVzNC4zOS0uNDUgNi0xLjIzdjIuMjN6TTEyIDExYy0zLjg3IDAtNi0xLjItNi0xLjVTOC4xMyA4IDEyIDhzNiAxLjIgNiAxLjUtMi4xMyAxLjUtNiAxLjV6Ii8%2BPC9zdmc%2B)](https://www.iso.org/standard/76583.html)
 [![SQLite](https://img.shields.io/badge/SQLite-003B57?style=flat&logo=sqlite&logoColor=white)](https://sqlite.org)
-[![SQL Server](https://img.shields.io/badge/SQL%20Server-CC2927?style=flat&logo=microsoftsqlserver&logoColor=white)](https://www.microsoft.com/sql-server)
+[![SQL Server](https://img.shields.io/badge/SQL%20Server-CC2927?style=flat&logo=data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAADQAAAA4AQMAAACIdEnTAAAABlBMVEX%2F%2F%2F%2F%2F%2F%2F9VfPVsAAAAAXRSTlMAQObYZgAAAT5JREFUeNol0T9rU3EcRvHP%2Ff6uubEtbSoUUqd0cJEuBYcgkVQC6io4OFYHfQdOKvEVqFvHDi7OujVDtSC4SLeWInhrq4IgxD9gjTVxuNPh8EyHB00IloGUVz4dFVcGFc8Nqv12AUn92whJ2q9vkYzS5Q04VYwRxjFfQnqaTiA7mH3cFybl1I81QfvtZB0%2BvEoD6B127gry9Wf7%2FcT5zay1GtQ80s%2BZW8sftHBl73U2zFlq33jYwLjVLSUWj7rXkXW2S8g%2Bdaueqz8R0uoOkvj94gtMfT%2BNsDAcIbR2qs6LZQ0cTK9Adji3DXGnSIixZh%2FReLNbIjUXvz6ZoHV%2Fpga94%2FoZeL%2Fc%2FIw4Ovt3A7lL964hlv5dALeK4xnE%2FMLuCVJ6%2BfzXEWYzNxF%2FomhD9rHTQPKutzeEomxVR3S38B8kGFTstg%2Bg7wAAAABJRU5ErkJggg%3D%3D)](https://www.microsoft.com/sql-server)
 
 **See the structure, not the data.**
 
