@@ -8,12 +8,12 @@
 [![BigQuery](https://img.shields.io/badge/BigQuery-669DF6?style=flat&logo=googlebigquery&logoColor=white)](https://cloud.google.com/bigquery)
 [![Firebird](https://img.shields.io/badge/Firebird-F40000?style=flat&logo=data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAAEAAAAA8AQMAAADsRy4nAAAABlBMVEX%2F%2F%2F%2F%2F%2F%2F9VfPVsAAAAAXRSTlMAQObYZgAAANdJREFUeNqF0DFOw0AUhOFv1xZxgRSXdOQI3MCh4RwpKVNSIS6GCDfgCMkNHERhpMSPYh0KFGCqXzOa3acBLTLcK0rD5FzUEzQmaE%2FgBAseQXeYDVN0VWBp1at1t5GeXmXbtWwj6y%2BnB2bRRUAVLzGSpBF2J%2FhMBEQ2gnfziIgI%2BQYc5SU4UEVERC%2BV0rHOllCp9A%2BQTP1ttgZtKl%2BlttQHcg0DuUktb%2BS9fWNTrp7HtsB1DGWElbo4ESMV0vNdFKv1q76Xb36uegYWZ6MKDh%2F%2F14ez0R%2F6Auk%2FS5evvJGZAAAAAElFTkSuQmCC)](https://firebirdsql.org)
 [![MariaDB](https://img.shields.io/badge/MariaDB-003545?style=flat&logo=mariadb&logoColor=white)](https://mariadb.org)
-[![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=mysql&logoColor=white)](https://mysql.com)
-[![Oracle](https://img.shields.io/badge/Oracle-F80000?style=flat&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyBmaWxsPSIjZmZmZmZmIiByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTYuNDEyIDQuNDEyaC04LjgyYTcuNTg4IDcuNTg4IDAgMCAwLS4wMDggMTUuMTc2aDguODI4YTcuNTg4IDcuNTg4IDAgMCAwIDAtMTUuMTc2em0tLjE5MyAxMi41MDJINy43ODZhNC45MTUgNC45MTUgMCAwIDEgMC05LjgyOGg4LjQzM2E0LjkxNCA0LjkxNCAwIDEgMSAwIDkuODI4eiIvPjwvc3ZnPg%3D%3D)](https://oracle.com/database/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat&logo=postgresql&logoColor=white)](https://postgresql.org)
+[![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![Oracle](https://img.shields.io/badge/Oracle-F80000?style=flat&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyBmaWxsPSIjZmZmZmZmIiByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTYuNDEyIDQuNDEyaC04LjgyYTcuNTg4IDcuNTg4IDAgMCAwLS4wMDggMTUuMTc2aDguODI4YTcuNTg4IDcuNTg4IDAgMCAwIDAtMTUuMTc2em0tLjE5MyAxMi41MDJINy43ODZhNC45MTUgNC45MTUgMCAwIDEgMC05LjgyOGg4LjQzM2E0LjkxNCA0LjkxNCAwIDEgMSAwIDkuODI4eiIvPjwvc3ZnPg%3D%3D)](https://www.oracle.com/database/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![SQL](https://img.shields.io/badge/SQL-4B5563?style=flat&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyBmaWxsPSIjZmZmZmZmIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI%2BPHBhdGggZD0iTTEyIDNDNy41OCAzIDQgNC4zNCA0IDZ2MTJjMCAxLjY2IDMuNTggMyA4IDNzOC0xLjM0IDgtM1Y2YzAtMS42Ni0zLjU4LTMtOC0zem02IDE1YzAgLjMtMi4xMyAxLjUtNiAxLjVTNiAxOC4zIDYgMTh2LTIuMjNjMS42MS43OCAzLjkgMS4yMyA2IDEuMjNzNC4zOS0uNDUgNi0xLjIzVjE4em0wLTQuNWMwIC4zLTIuMTMgMS41LTYgMS41cy02LTEuMi02LTEuNXYtMi4yM0M3LjYxIDEyLjA1IDkuOSAxMi41IDEyIDEyLjVzNC4zOS0uNDUgNi0xLjIzdjIuMjN6TTEyIDExYy0zLjg3IDAtNi0xLjItNi0xLjVTOC4xMyA4IDEyIDhzNiAxLjIgNiAxLjUtMi4xMyAxLjUtNiAxLjV6Ii8%2BPC9zdmc%2B)](https://www.iso.org/standard/76583.html)
 [![SQLite](https://img.shields.io/badge/SQLite-003B57?style=flat&logo=sqlite&logoColor=white)](https://sqlite.org)
-[![SQL Server](https://img.shields.io/badge/SQL%20Server-CC2927?style=flat&logo=data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAADQAAAA4AQMAAACIdEnTAAAABlBMVEX%2F%2F%2F%2F%2F%2F%2F9VfPVsAAAAAXRSTlMAQObYZgAAAT5JREFUeNol0T9rU3EcRvHP%2Ff6uubEtbSoUUqd0cJEuBYcgkVQC6io4OFYHfQdOKvEVqFvHDi7OujVDtSC4SLeWInhrq4IgxD9gjTVxuNPh8EyHB00IloGUVz4dFVcGFc8Nqv12AUn92whJ2q9vkYzS5Q04VYwRxjFfQnqaTiA7mH3cFybl1I81QfvtZB0%2BvEoD6B127gry9Wf7%2FcT5zay1GtQ80s%2BZW8sftHBl73U2zFlq33jYwLjVLSUWj7rXkXW2S8g%2Bdaueqz8R0uoOkvj94gtMfT%2BNsDAcIbR2qs6LZQ0cTK9Adji3DXGnSIixZh%2FReLNbIjUXvz6ZoHV%2Fpga94%2FoZeL%2Fc%2FIw4Ovt3A7lL964hlv5dALeK4xnE%2FMLuCVJ6%2BfzXEWYzNxF%2FomhD9rHTQPKutzeEomxVR3S38B8kGFTstg%2Bg7wAAAABJRU5ErkJggg%3D%3D)](https://www.microsoft.com/sql-server)
+[![SQL Server](https://img.shields.io/badge/SQL%20Server-CC2927?style=flat&logo=data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAADQAAAA4AQMAAACIdEnTAAAABlBMVEX%2F%2F%2F%2F%2F%2F%2F9VfPVsAAAAAXRSTlMAQObYZgAAAT5JREFUeNol0T9rU3EcRvHP%2Ff6uubEtbSoUUqd0cJEuBYcgkVQC6io4OFYHfQdOKvEVqFvHDi7OujVDtSC4SLeWInhrq4IgxD9gjTVxuNPh8EyHB00IloGUVz4dFVcGFc8Nqv12AUn92whJ2q9vkYzS5Q04VYwRxjFfQnqaTiA7mH3cFybl1I81QfvtZB0%2BvEoD6B127gry9Wf7%2FcT5zay1GtQ80s%2BZW8sftHBl73U2zFlq33jYwLjVLSUWj7rXkXW2S8g%2Bdaueqz8R0uoOkvj94gtMfT%2BNsDAcIbR2qs6LZQ0cTK9Adji3DXGnSIixZh%2FReLNbIjUXvz6ZoHV%2Fpga94%2FoZeL%2Fc%2FIw4Ovt3A7lL964hlv5dALeK4xnE%2FMLuCVJ6%2BfzXEWYzNxF%2FomhD9rHTQPKutzeEomxVR3S38B8kGFTstg%2Bg7wAAAABJRU5ErkJggg%3D%3D)](https://www.microsoft.com/en-us/sql-server)
 
 **See the structure, not the data.**
 
@@ -137,12 +137,12 @@ An LLM can use this to write a correct join between `orders` and `customers` (ri
 
 1. Open the script for your engine in the `scripts/` folder
 2. Adjust the `params` block at the top of the file (schema filter, whether to include row counts, whether to pretty-print)
-3. Run the script in any SQL client ([DBeaver](https://dbeaver.io/), [DataGrip](https://www.jetbrains.com/datagrip/), [psql](https://www.postgresql.org/docs/current/app-psql.html), [pgAdmin](https://www.pgadmin.org/), [Metabase](https://www.metabase.com/), Insight, [SSMS](https://learn.microsoft.com/en-us/sql/ssms/))
+3. Run the script in any SQL client ([DBeaver](https://dbeaver.io/), [DataGrip](https://www.jetbrains.com/datagrip/), [psql](https://www.postgresql.org/docs/current/app-psql.html), [pgAdmin](https://www.pgadmin.org/), [Metabase](https://www.metabase.com/), Insight, [SSMS](https://learn.microsoft.com/en-us/ssms/sql-server-management-studio-ssms))
 4. The result is a single cell containing a JSON document. Copy and save it as `schema.json`.
 
 Some clients escape that single cell when you use their "export" or "download as JSON" feature, wrapping the whole dump into a string like `[{"schema_dump":"{\n    \"tables\": [...escaped..."}]`. The real JSON is intact, just nested and escaped. The fix is to pull out the `schema_dump` field, which unescapes it in one pass.
 
-**macOS / Linux** (with [`jq`](https://jqlang.github.io/jq/)):
+**macOS / Linux** (with [`jq`](https://jqlang.org/)):
 
 ```bash
 jq -r '.[0].schema_dump' downloaded.json > schema.json
@@ -194,7 +194,7 @@ For sequences and user-defined types: existence and basic metadata only. Enum va
 
 ## What you can build from the dump
 
-The dump is structural metadata in a predictable JSON shape. Once you have it, plenty of useful artifacts fall out almost for free, mostly by handing the JSON to an LLM with a short instruction. Programmatic access works too: anything that reads JSON ([`jq`](https://jqlang.github.io/jq/), Python's [`json`](https://docs.python.org/3/library/json.html), JavaScript's `JSON.parse`) can walk the structure directly.
+The dump is structural metadata in a predictable JSON shape. Once you have it, plenty of useful artifacts fall out almost for free, mostly by handing the JSON to an LLM with a short instruction. Programmatic access works too: anything that reads JSON ([`jq`](https://jqlang.org/), Python's [`json`](https://docs.python.org/3/library/json.html), JavaScript's `JSON.parse`) can walk the structure directly.
 
 ### Visual diagrams
 
@@ -243,12 +243,12 @@ erDiagram
 
 | Target | What to ask for |
 |---|---|
-| Python ORMs | [SQLAlchemy](https://www.sqlalchemy.org/) 2.0 `Mapped[]` models, [Django](https://docs.djangoproject.com/en/stable/topics/db/models/) models, [Tortoise ORM](https://tortoise.github.io/), [peewee](https://docs.peewee-orm.com/) |
+| Python ORMs | [SQLAlchemy](https://www.sqlalchemy.org/) 2.0 `Mapped[]` models, [Django](https://docs.djangoproject.com/en/stable/topics/db/models/) models, [Tortoise ORM](https://tortoise.github.io/), [peewee](https://docs.peewee-orm.com/en/latest/) |
 | TypeScript / JS | [Prisma](https://www.prisma.io/) schemas, [TypeORM](https://typeorm.io/) entities, [Drizzle ORM](https://orm.drizzle.team/) schemas, [Zod](https://zod.dev/) validators |
 | Go | [GORM](https://gorm.io/) structs, [sqlc](https://sqlc.dev/) queries with `CREATE TABLE` references |
-| Type definitions | [Pydantic](https://docs.pydantic.dev/) v2 models, TypeScript interfaces, [JSON Schema](https://json-schema.org/), [protobuf](https://protobuf.dev/), [GraphQL SDL](https://graphql.org/learn/schema/) |
+| Type definitions | [Pydantic](https://pydantic.dev/docs/) v2 models, TypeScript interfaces, [JSON Schema](https://json-schema.org/), [protobuf](https://protobuf.dev/), [GraphQL SDL](https://graphql.org/learn/schema/) |
 | API specs | [OpenAPI/Swagger](https://www.openapis.org/), [GraphQL](https://graphql.org/) schemas with resolvers stubbed |
-| Migration tools | [Alembic](https://alembic.sqlalchemy.org/), [Flyway](https://www.red-gate.com/products/flyway/), [Liquibase](https://www.liquibase.com/), [dbmate](https://github.com/amacneil/dbmate) skeletons |
+| Migration tools | [Alembic](https://alembic.sqlalchemy.org/en/latest/), [Flyway](https://www.red-gate.com/products/flyway/), [Liquibase](https://www.liquibase.com/), [dbmate](https://github.com/amacneil/dbmate) skeletons |
 
 Generic prompt: "Generate SQLAlchemy 2.0 declarative models from this schema dump. Use `Mapped[]` annotations, match column types properly, and add `relationship()` calls based on the foreign keys."
 
@@ -305,11 +305,11 @@ Existence is still recorded where useful. `check_constraint_count: 3` tells the 
 
 | Engine | Script | Status | Minimum version |
 |---|---|---|---|
-| [BigQuery](https://dbdb.io/db/bigquery) | `scripts/bigquery-xray.sql` | Stable | [GoogleSQL](https://cloud.google.com/bigquery/docs/introduction-sql) |
+| [BigQuery](https://dbdb.io/db/bigquery) | `scripts/bigquery-xray.sql` | Stable | [GoogleSQL](https://docs.cloud.google.com/bigquery/docs/introduction-sql) |
 | [Firebird](https://dbdb.io/db/firebird) | `scripts/firebird-xray.sql` | Stable (Markdown output) | [Firebird 4.0](https://firebirdsql.org/en/firebird-4-0/) |
-| [MariaDB](https://dbdb.io/db/mariadb) | `scripts/mariadb-xray.sql` | Stable | [MariaDB 10.5](https://mariadb.com/kb/en/changes-improvements-in-mariadb-105/) |
+| [MariaDB](https://dbdb.io/db/mariadb) | `scripts/mariadb-xray.sql` | Stable | [MariaDB 10.5](https://mariadb.com/docs/release-notes/community-server/old-releases/10.5/what-is-mariadb-105) |
 | [MySQL](https://dbdb.io/db/mysql) | `scripts/mysql-xray.sql` | Stable | [MySQL 8.0.16](https://dev.mysql.com/doc/relnotes/mysql/8.0/en/news-8-0-16.html) |
-| [Oracle](https://dbdb.io/db/oracle-rdbms) | `scripts/oracle-xray.sql` | Stable | [Oracle 18c](https://docs.oracle.com/en/database/oracle/oracle-database/18/) |
+| [Oracle](https://dbdb.io/db/oracle) | `scripts/oracle-xray.sql` | Stable | [Oracle 18c](https://docs.oracle.com/en/database/oracle/oracle-database/18/) |
 | [PostgreSQL](https://dbdb.io/db/postgresql) | `scripts/postgres-xray.sql` | Stable | [PostgreSQL 12](https://www.postgresql.org/docs/12/release-12.html) |
 | [SQL Server](https://dbdb.io/db/sql-server) | `scripts/sqlserver-xray.sql` | Stable | [SQL Server 2022](https://learn.microsoft.com/en-us/sql/sql-server/what-s-new-in-sql-server-2022) |
 | [SQLite](https://dbdb.io/db/sqlite) | `scripts/sqlite-xray.sql` | Stable | [SQLite 3.44](https://www.sqlite.org/releaselog/3_44_0.html) |
@@ -437,7 +437,7 @@ Engine-specific sections keep their own descriptive names. PostgreSQL has `INHER
 The privacy stance is strong but not infinite. The following can appear in a dump and may matter in some contexts:
 
 - **Names of schemas, tables, columns, indexes, and constraints.** Almost always describe types of data rather than data itself, but proprietary product names or classified project codenames could be considered sensitive. Review before sharing externally if this applies to you.
-- **Estimated row counts.** Aggregate counts are universally safe under [HIPAA](https://www.hhs.gov/hipaa/index.html), [GDPR](https://gdpr.eu/), and similar regimes, but in very small populations a count could narrow identification. Set `include_stats = FALSE` if needed.
+- **Estimated row counts.** Aggregate counts are universally safe under [HIPAA](https://www.hhs.gov/hipaa/index.html), [GDPR](https://gdpr-info.eu/), and similar regimes, but in very small populations a count could narrow identification. Set `include_stats = FALSE` if needed.
 - **Foreign key target names.** Reveal which tables relate to which.
 - **Sequence visibility on least-privilege roles.** Sequence reporting can depend on the connecting role's privileges. The PostgreSQL script reads sequences from `pg_catalog` (`pg_class` + `pg_sequence`), which is not privilege-filtered, so it reports them accurately even on read-only roles. The SQL Server script (`sys.sequences`) and the MariaDB script (`information_schema`) are subject to engine-level metadata visibility and may under-report sequences unless the role has been granted `VIEW DEFINITION` (SQL Server) or a privilege on the objects (MariaDB). Oracle (`user_sequences`) reports the connected user's own sequences and is unaffected.
 
@@ -452,9 +452,9 @@ Strong recommendation: use only an LLM your employer has explicitly vetted, or o
 Before pasting a dump into any LLM:
 
 - Check your organization's data governance, IT, or security policy
-- Confirm the LLM provider's data handling terms (training opt-out, retention, geographic location, [subprocessor](https://gdpr.eu/article-28-processor/) list)
+- Confirm the LLM provider's data handling terms (training opt-out, retention, geographic location, [subprocessor](https://gdpr-info.eu/art-28-gdpr/) list)
 - Prefer enterprise or API tiers with zero-retention guarantees over free consumer chat tiers
-- When in doubt, ask your [DPO](https://gdpr.eu/data-protection-officer/), CISO, IT, or compliance contact
+- When in doubt, ask your [DPO](https://gdpr-info.eu/art-37-gdpr/), CISO, IT, or compliance contact
 
 The author and contributors of SQL X-Ray accept no liability for misuse, data exposure, regulatory consequences, or contractual breaches that result from sharing dump output with third-party services. The tool's privacy properties are a starting point, not a substitute for institutional review.
 
