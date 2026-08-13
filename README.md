@@ -17,7 +17,7 @@
 
 **See the structure, not the data.**
 
-SQL X-Ray produces a privacy-safe structural dump of a SQL database, designed as priming context for an LLM. Structure only, never values: no defaults, no constraint expressions, no view bodies, no enum labels, no sample data. Safe to share with any LLM regardless of what your database contains.
+SQL X-Ray produces a privacy-safe structural dump of a SQL database, designed as priming context for an LLM. Structure only, never values: no defaults, no constraint expressions, no view bodies, no enum labels, no sample data. What leaves your database is object names, types, and relationships. Read [Edge cases worth knowing](#edge-cases-worth-knowing) before sending a dump outside your organization.
 
 ---
 
@@ -186,7 +186,7 @@ For every table:
 
 For views and materialized views: schema, name, and column list with types and nullability.
 
-For routines: schema, name, kind (function, procedure, aggregate, window), language, return type, argument signature, and an `is_trigger` flag. Bodies are never extracted. Extension-owned functions are filtered out so output stays clean.
+For routines: schema, name, kind (function, procedure, aggregate, window), language, return type, argument signature, and an `is_trigger` flag. Bodies are never extracted. Argument lists come from the identity form of the signature, so parameter defaults are not rendered. Extension-owned functions are filtered out so output stays clean.
 
 For sequences and user-defined types: existence and basic metadata only. Enum value labels are excluded by design.
 
@@ -290,6 +290,7 @@ The LLM has the tables, the columns, the types, and the relationships in one pla
 | Excluded | Why |
 |---|---|
 | Default value literals | Could contain personal data or business strings |
+| Routine argument defaults | Same risk, reached through the routine signature |
 | Check constraint expressions | Could contain literal values or domain logic |
 | View and materialized view definitions | SQL bodies could reveal filtering over sensitive columns |
 | Function and procedure bodies | Could contain hardcoded identifiers or business logic |
@@ -332,13 +333,16 @@ A note on the MySQL and MariaDB scripts: a small number of hosted SQL sandbox en
 
 The scripts run cleanly on schemas with hundreds of tables. Validated runs include a 251-table Oracle schema producing a 263 KB dump in a single query. The natural ceiling on output size is the LLM context window, not the database engine.
 
-If you have a much larger schema (thousands of tables) or you want to keep the dump small enough to fit comfortably in an LLM session, every dump includes an `object_counts` field in its metadata so you can see the size at a glance. From there you have a few options for trimming:
+Per-table cost scales with column count rather than table count, so wide schemas run far heavier than that benchmark suggests. A 1,154-table clinical trial database with CRF-generated item tables produced a 13 MB dump, roughly ten times the per-table cost of the Oracle run. In that dump columns accounted for 68% of the payload, foreign keys 16%, and indexes 11%. EDC systems, survey platforms, and EAV-shaped schemas all behave this way.
+
+If you have a much larger schema (thousands of tables) or you want to keep the dump small enough to fit comfortably in an LLM session, every dump includes an `object_counts` field in its metadata so you can see the size at a glance. From there you have a few options for trimming, in descending order of effect:
 
 | Option | Effect |
 |---|---|
-| Comment out the `INDEXES` and `TRIGGER COUNTS` sections | Removes the largest per-table payloads while keeping columns, PKs, and FKs intact |
-| Set `@include_stats = FALSE` (MySQL, MariaDB) or skip the stats CTE elsewhere | Drops row count and size estimates |
-| Filter by schema (PostgreSQL `@schema_filter`, MySQL `@schema_filter`) | Dump one logical area at a time |
+| Filter by schema (PostgreSQL `schema_filter`, MySQL `@schema_filter`) | Dump one logical area at a time. Usually the largest single reduction |
+| Comment out the `FOREIGN KEYS` section | Drops the relationship graph. Only useful when the consumer already has it from an earlier dump |
+| Comment out the `INDEXES` and `TRIGGER COUNTS` sections | Removes per-table index metadata while keeping columns, PKs, and FKs intact |
+| Set `@include_stats = FALSE` (MySQL, MariaDB) or skip the stats CTE elsewhere | Drops row count and size estimates. Also the privacy lever for small populations |
 | Run the script, then ask the LLM to summarize | Push the trimming logic to the consumer where it has more context |
 
 These are deliberate manual choices rather than automatic degradation: the script always reports the full structure of whatever you point it at, and the trimming decision belongs to the person who knows what they're going to do with the result.
@@ -429,7 +433,7 @@ Engine-specific sections keep their own descriptive names. PostgreSQL has `INHER
 ## Security and privacy
 
 - **Read-only.** Every script queries system catalogs and `information_schema` only. It never modifies the database, never queries row data, and never samples values from user columns.
-- **Structure only, never values.** No field in the output can carry sensitive data by design. The guarantee comes from what the script doesn't read, not from filtering applied afterward.
+- **Structure only, never values.** No field in the output carries row data or literal values. The guarantee comes from what the script doesn't read, not from filtering applied afterward. Object names are the one thing that crosses over, and reviewing them is on you.
 - **No network calls.** Everything runs in your SQL client against your database. Nothing leaves your environment until you choose to share the output.
 
 ### Edge cases worth knowing
@@ -437,7 +441,7 @@ Engine-specific sections keep their own descriptive names. PostgreSQL has `INHER
 The privacy stance is strong but not infinite. The following can appear in a dump and may matter in some contexts:
 
 - **Names of schemas, tables, columns, indexes, and constraints.** Almost always describe types of data rather than data itself, but proprietary product names or classified project codenames could be considered sensitive. Review before sharing externally if this applies to you.
-- **Estimated row counts.** Aggregate counts are universally safe under [HIPAA](https://www.hhs.gov/hipaa/index.html), [GDPR](https://gdpr-info.eu/), and similar regimes, but in very small populations a count could narrow identification. Set `include_stats = FALSE` if needed.
+- **Estimated row counts.** A count identifies no individual, and aggregate counts are generally treated as non-identifying under [HIPAA](https://www.hhs.gov/hipaa/index.html), [GDPR](https://gdpr-info.eu/), and similar regimes. In very small populations a count can still narrow identification. Set `include_stats = FALSE` if that applies to you.
 - **Foreign key target names.** Reveal which tables relate to which.
 - **Sequence visibility on least-privilege roles.** Sequence reporting can depend on the connecting role's privileges. The PostgreSQL script reads sequences from `pg_catalog` (`pg_class` + `pg_sequence`), which is not privilege-filtered, so it reports them accurately even on read-only roles. The SQL Server script (`sys.sequences`) and the MariaDB script (`information_schema`) are subject to engine-level metadata visibility and may under-report sequences unless the role has been granted `VIEW DEFINITION` (SQL Server) or a privilege on the objects (MariaDB). Oracle (`user_sequences`) reports the connected user's own sequences and is unaffected.
 
